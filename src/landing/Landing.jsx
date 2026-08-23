@@ -32,6 +32,9 @@ import {
   HelpCircle,
   Sparkles,
   ScanEye,
+  Gauge,
+  TrendingUp,
+  Award,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -204,10 +207,27 @@ const ECOSYSTEM_NODES = [
 const FEATURES = [
   { icon: Wallet, title: "Contributions & Savings", copy: "Digitally track every contribution and savings balance as it happens, not at month-end." },
   { icon: Landmark, title: "Loan Management", copy: "Run requests, assessment, approval and repayment through one consistent workflow." },
+  { icon: Gauge, title: "Credit Scoring", copy: "Generate a transparent member credit profile from cooperative activity to guide lending decisions." },
   { icon: BarChart3, title: "Financial Monitoring", copy: "Give committees a live, accurate view of cooperative finances at any moment." },
   { icon: ShieldCheck, title: "Transaction Audit Trails", copy: "Every meaningful action is written to a tamper-evident, hash-chained ledger." },
   { icon: Vote, title: "Digital Governance", copy: "Hold meetings, votes and member discussions without requiring everyone in one room." },
   { icon: MessageSquareText, title: "Reports & Insights", copy: "Turn raw cooperative data into summaries administrators can act on quickly." },
+];
+
+// Cooperative Credit Scoring — conceptual example data (demonstration only).
+const CREDIT_SCORE_FACTORS = [
+  { label: "Contribution consistency", value: "Excellent", tone: "ok" },
+  { label: "Repayment history", value: "Good", tone: "ok" },
+  { label: "Loan obligations", value: "Low", tone: "ok" },
+  { label: "Financial participation", value: "Strong", tone: "ok" },
+];
+
+const CREDIT_FLOW = ["Member Activity", "Financial Records", "Credit Profile", "Better Lending Decisions"];
+
+const CREDIT_STATS = [
+  { icon: TrendingUp, label: "Repayment", value: "96% On Time" },
+  { icon: ShieldCheck, label: "Risk Level", value: "Low" },
+  { icon: Wallet, label: "Contribution", value: "Consistent" },
 ];
 
 const AI_FLOW = ["Monitor", "Analyze", "Identify", "Recommend", "Human Approval", "Execute", "Audit"];
@@ -252,6 +272,14 @@ const HOW_IT_WORKS = [
   { n: "02", title: "Participate", copy: "Manage contributions, loans and cooperative activity from your dashboard." },
   { n: "03", title: "Monitor", copy: "Coop Guard Intelligence continuously watches routine activity for you." },
   { n: "04", title: "Decide", copy: "The agent prepares recommendations. Authorized humans make the final call." },
+];
+
+const ABOUT_MISSION = "Coop Guard is built by a small, multidisciplinary team combining product research, software engineering, design and financial-inclusion thinking. We're united by one goal: making cooperative societies more transparent, efficient, secure and accessible for every member — from committee administrators to first-time savers.";
+
+const ABOUT_STATS = [
+  { icon: Users, value: 5, suffix: "", label: "Founding team members" },
+  { icon: Sparkles, value: 1, suffix: "", label: "Shared product vision" },
+  { icon: Award, value: 100, suffix: "%", label: "Human-controlled decisions" },
 ];
 
 // Real team information — photos live in /public/team, referenced by path.
@@ -320,6 +348,7 @@ function Nav({ onNavigate }) {
   const links = [
     { href: "#home", label: "Home" },
     { href: "#ai", label: "For Administrators" },
+    { href: "#credit-scoring", label: "Credit Scoring" },
     { href: "#members", label: "For Members" },
     { href: "#how-it-works", label: "How It Works" },
     { href: "#team", label: "About" },
@@ -744,6 +773,95 @@ function AIDemoPanel() {
   );
 }
 
+function CreditScoreMeter({ score = 82, visible }) {
+  const animated = useCountUp(score, visible, 1300);
+  const pct = Math.min(100, Math.max(0, animated));
+  return (
+    <div className="cgl-credit-meter" role="img" aria-label={`Member credit score ${score} out of 100`}>
+      <svg viewBox="0 0 200 110" className="cgl-credit-meter-svg">
+        <path d="M14 100 A86 86 0 0 1 186 100" className="cgl-credit-meter-track" />
+        <path
+          d="M14 100 A86 86 0 0 1 186 100"
+          className="cgl-credit-meter-fill"
+          style={{ strokeDashoffset: 270 - (270 * pct) / 100 }}
+        />
+      </svg>
+      <div className="cgl-credit-meter-readout">
+        <span className="cgl-mono cgl-credit-meter-num">{animated}</span>
+        <span className="cgl-credit-meter-den">/ 100</span>
+      </div>
+    </div>
+  );
+}
+
+function CreditScoreSection() {
+  const [ref, visible] = useReveal();
+  return (
+    <RevealSection id="credit-scoring" className="cgl-credit">
+      <div className="cgl-section-head">
+        <p className="cgl-eyebrow">Smart credit scoring</p>
+        <h2>Track behaviour. Understand risk. Lend with confidence.</h2>
+        <p className="cgl-section-copy">
+          Coop Guard is not a bank or a credit bureau. It's a cooperative credit
+          scoring system that turns a member's contribution and repayment activity
+          into a transparent profile — helping administrators answer one question:
+          can this member responsibly handle another cooperative loan?
+        </p>
+      </div>
+
+      <div className="cgl-credit-flow">
+        {CREDIT_FLOW.map((step, i) => (
+          <React.Fragment key={step}>
+            <div className="cgl-credit-flow-step" style={{ "--d": `${i * 100}ms` }}>{step}</div>
+            {i < CREDIT_FLOW.length - 1 && <span className="cgl-flow-arrow" aria-hidden="true">→</span>}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div className="cgl-credit-panel" ref={ref}>
+        <div className="cgl-credit-card">
+          <div className="cgl-credit-card-head">
+            <span className="cgl-badge cgl-badge-ok">Demonstration data</span>
+            <span className="cgl-credit-card-title">Member Credit Score</span>
+          </div>
+          <div className="cgl-credit-card-body">
+            <CreditScoreMeter score={82} visible={visible} />
+            <ul className="cgl-credit-breakdown">
+              {CREDIT_SCORE_FACTORS.map((f) => (
+                <li key={f.label}>
+                  <span>{f.label}</span>
+                  <span className={`cgl-credit-tag ${f.tone === "ok" ? "cgl-ok" : ""}`}>{f.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="cgl-credit-stats">
+          {CREDIT_STATS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div className="cgl-credit-stat" key={s.label}>
+                <span className="cgl-credit-stat-icon"><Icon size={17} strokeWidth={2.2} /></span>
+                <div>
+                  <span className="cgl-member-label">{s.label}</span>
+                  <span className="cgl-member-value cgl-mono">{s.value}</span>
+                </div>
+              </div>
+            );
+          })}
+          <p className="cgl-credit-note">
+            Scores are generated from cooperative records already in Coop Guard —
+            contribution frequency, repayment timeliness and outstanding obligations —
+            to reduce subjective, manual lending decisions. The system recommends;
+            authorized administrators decide.
+          </p>
+        </div>
+      </div>
+    </RevealSection>
+  );
+}
+
 function ExceptionDashboard() {
   const [ref, visible] = useReveal();
   const total = useCountUp(1284, visible);
@@ -972,15 +1090,35 @@ function HowItWorks() {
   );
 }
 
+function AboutStat({ stat, visible, delay }) {
+  const Icon = stat.icon;
+  const animated = useCountUp(stat.value, visible, 1100);
+  return (
+    <div className="cgl-about-stat" style={{ "--d": `${delay}ms` }}>
+      <span className="cgl-about-stat-icon"><Icon size={18} strokeWidth={2.2} /></span>
+      <span className="cgl-about-stat-value cgl-mono">{animated}{stat.suffix}</span>
+      <span className="cgl-about-stat-label">{stat.label}</span>
+    </div>
+  );
+}
+
 function TeamSection() {
   const count = TEAM_MEMBERS.length;
   const { index, setIndex, next, prev, setPaused } = useAutoRotate(count, 6000);
+  const [statsRef, statsVisible] = useReveal();
 
   return (
     <RevealSection id="team" className="cgl-team">
       <div className="cgl-section-head">
         <p className="cgl-eyebrow">About us</p>
-        <h2>Meet the team</h2>
+        <h2>The people building Coop Guard</h2>
+        <p className="cgl-section-copy">{ABOUT_MISSION}</p>
+      </div>
+
+      <div className={`cgl-about-stats ${statsVisible ? "is-visible" : ""}`} ref={statsRef}>
+        {ABOUT_STATS.map((s, i) => (
+          <AboutStat stat={s} visible={statsVisible} delay={i * 110} key={s.label} />
+        ))}
       </div>
 
       {count === 0 ? (
@@ -998,17 +1136,22 @@ function TeamSection() {
             <ChevronLeft size={18} />
           </button>
 
-          <div className="cgl-team-card">
-            <div className="cgl-team-photo">
-              {TEAM_MEMBERS[index].photoUrl ? (
-                <img src={TEAM_MEMBERS[index].photoUrl} alt={TEAM_MEMBERS[index].name} />
-              ) : (
-                <Users size={28} strokeWidth={1.8} />
-              )}
+          <div className="cgl-team-card" key={index}>
+            <div className="cgl-team-photo-ring">
+              <div className="cgl-team-photo">
+                {TEAM_MEMBERS[index].photoUrl ? (
+                  <img src={TEAM_MEMBERS[index].photoUrl} alt={TEAM_MEMBERS[index].name} />
+                ) : (
+                  <Users size={28} strokeWidth={1.8} />
+                )}
+              </div>
             </div>
             <h3>{TEAM_MEMBERS[index].name}</h3>
             <p className="cgl-team-role">{TEAM_MEMBERS[index].role}</p>
             {TEAM_MEMBERS[index].bio && <p className="cgl-team-bio">{TEAM_MEMBERS[index].bio}</p>}
+            <div className="cgl-team-progress-track">
+              <div className="cgl-team-progress-fill" />
+            </div>
           </div>
 
           <button className="cgl-team-nav" onClick={next} aria-label="Next team member" type="button">
@@ -1152,6 +1295,7 @@ export default function Landing({ onNavigate }) {
       <Solution />
       <Features />
       <AIAgent />
+      <CreditScoreSection />
       <ExceptionDashboard />
       <HumanControlled />
       <MemberExperience />
@@ -1379,6 +1523,34 @@ function LandingStyles() {
       .cgl-demo-actions { display: flex; gap: 8px; }
       .cgl-demo-alert--done { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgba(247,249,250,0.65); }
 
+      /* Credit scoring */
+      .cgl-credit-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+      .cgl-credit-flow-step { background: var(--cgl-paper-2); border: 1px solid var(--cgl-line); border-radius: 999px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; color: var(--cgl-ink); opacity: 0; transform: translateY(6px); animation: cgl-card-in 0.5s ease forwards; animation-delay: var(--d, 0ms); }
+      .is-visible .cgl-credit-flow-step { animation-play-state: running; }
+      .cgl-credit-panel { display: grid; grid-template-columns: minmax(0, 380px) 1fr; gap: 20px; align-items: stretch; }
+      @media (max-width: 860px) { .cgl-credit-panel { grid-template-columns: 1fr; } }
+      .cgl-credit-card { background: #fff; border: 1px solid var(--cgl-line); border-radius: 18px; padding: 24px; box-shadow: 0 20px 46px -26px rgba(14,26,48,0.25); }
+      .cgl-credit-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+      .cgl-credit-card-title { font-size: 12.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; }
+      .cgl-badge-ok { background: rgba(111,207,151,0.16); color: #2E7D52; }
+      .cgl-credit-card-body { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      .cgl-credit-meter { position: relative; width: 200px; }
+      .cgl-credit-meter-svg { width: 100%; height: auto; display: block; }
+      .cgl-credit-meter-track { fill: none; stroke: var(--cgl-paper-2); stroke-width: 14; stroke-linecap: round; }
+      .cgl-credit-meter-fill { fill: none; stroke: var(--cgl-teal-deep); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 270; transition: stroke-dashoffset 0.3s ease; }
+      .cgl-credit-meter-readout { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); display: flex; align-items: baseline; gap: 3px; }
+      .cgl-credit-meter-num { font-size: 30px; font-weight: 700; color: var(--cgl-navy); }
+      .cgl-credit-meter-den { font-size: 13px; color: #94A3B0; }
+      .cgl-credit-breakdown { list-style: none; margin: 6px 0 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+      .cgl-credit-breakdown li { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #4B5D6E; border-top: 1px dashed var(--cgl-line); padding-top: 10px; }
+      .cgl-credit-breakdown li:first-child { border-top: none; padding-top: 0; }
+      .cgl-credit-tag { font-weight: 700; }
+      .cgl-credit-stats { display: flex; flex-direction: column; gap: 12px; }
+      .cgl-credit-stat { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--cgl-line); border-radius: 14px; padding: 16px 18px; }
+      .cgl-credit-stat > div { display: flex; flex-direction: column; gap: 2px; }
+      .cgl-credit-stat-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--cgl-paper-2); color: var(--cgl-teal-deep); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .cgl-credit-note { font-size: 12.5px; line-height: 1.7; color: #64748B; background: var(--cgl-paper-2); border-radius: 14px; padding: 16px 18px; margin: 4px 0 0; }
+
       /* Exception dashboard */
       .cgl-exception-panel { background: #fff; border: 1px solid var(--cgl-line); border-radius: 18px; padding: 26px; display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease, transform 0.6s ease; }
       .cgl-exception-panel.is-visible { opacity: 1; transform: translateY(0); }
@@ -1440,6 +1612,21 @@ function LandingStyles() {
       .cgl-how-num { display: block; font-size: 12px; color: var(--cgl-teal-deep); font-weight: 700; margin-bottom: 6px; }
       .cgl-how-step h3 { font-size: 15px; margin: 0 0 6px; }
       .cgl-how-step p { font-size: 12.5px; line-height: 1.6; color: #64748B; margin: 0; }
+
+      /* About / Team */
+      .cgl-about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0 44px; }
+      @media (max-width: 640px) { .cgl-about-stats { grid-template-columns: 1fr; } }
+      .cgl-about-stat { background: #fff; border: 1px solid var(--cgl-line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; opacity: 0; transform: translateY(8px); animation: cgl-card-in 0.5s ease forwards; animation-delay: var(--d, 0ms); }
+      .is-visible .cgl-about-stat { animation-play-state: running; }
+      .cgl-about-stat-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--cgl-paper-2); color: var(--cgl-teal-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+      .cgl-about-stat-value { font-size: 22px; font-weight: 700; color: var(--cgl-navy); }
+      .cgl-about-stat-label { font-size: 12px; color: #64748B; }
+      .cgl-team-photo-ring { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px; padding: 4px; background: conic-gradient(var(--cgl-teal), var(--cgl-teal-deep), var(--cgl-navy), var(--cgl-teal)); animation: cgl-ring-spin 8s linear infinite; }
+      @keyframes cgl-ring-spin { to { transform: rotate(360deg); } }
+      .cgl-team-photo-ring .cgl-team-photo { width: 100%; height: 100%; margin: 0; }
+      .cgl-team-progress-track { margin-top: 16px; height: 3px; border-radius: 999px; background: var(--cgl-paper-2); overflow: hidden; }
+      .cgl-team-progress-fill { height: 100%; width: 0%; background: var(--cgl-teal-deep); border-radius: 999px; animation: cgl-team-progress 6s linear forwards; }
+      @keyframes cgl-team-progress { from { width: 0%; } to { width: 100%; } }
 
       /* Team */
       .cgl-team-pending { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 20px; color: #94A3B0; text-align: center; }
