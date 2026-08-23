@@ -1621,8 +1621,7 @@ function LandingStyles() {
       .cgl-about-stat-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--cgl-paper-2); color: var(--cgl-teal-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
       .cgl-about-stat-value { font-size: 22px; font-weight: 700; color: var(--cgl-navy); }
       .cgl-about-stat-label { font-size: 12px; color: #64748B; }
-      .cgl-team-photo-ring { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px; padding: 4px; background: conic-gradient(var(--cgl-teal), var(--cgl-teal-deep), var(--cgl-navy), var(--cgl-teal)); animation: cgl-ring-spin 8s linear infinite; }
-      @keyframes cgl-ring-spin { to { transform: rotate(360deg); } }
+      .cgl-team-photo-ring { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px; padding: 4px; background: conic-gradient(var(--cgl-teal), var(--cgl-teal-deep), var(--cgl-navy), var(--cgl-teal)); }
       .cgl-team-photo-ring .cgl-team-photo { width: 100%; height: 100%; margin: 0; }
       .cgl-team-progress-track { margin-top: 16px; height: 3px; border-radius: 999px; background: var(--cgl-paper-2); overflow: hidden; }
       .cgl-team-progress-fill { height: 100%; width: 0%; background: var(--cgl-teal-deep); border-radius: 999px; animation: cgl-team-progress 6s linear forwards; }
