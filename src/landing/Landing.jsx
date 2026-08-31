@@ -170,31 +170,31 @@ const TYPED_PHRASES = [
 ];
 
 const VALUE_PROPS = [
-  { icon: Link2, title: "Centralized", copy: "Contributions, loans, repayments and governance, in one ecosystem instead of scattered ledgers." },
+  { icon: Link2, title: "All in one place", copy: "Contributions, loans, repayments and governance — in one system instead of scattered records." },
   { icon: Eye, title: "Transparent", copy: "Every record and action is traceable, so members always know where their money stands." },
-  { icon: Brain, title: "Intelligent", copy: "An AI Operations Agent watches routine activity and flags what actually needs attention." },
-  { icon: Users, title: "Inclusive", copy: "Members interact the way they find easiest, without depending entirely on someone else." },
+  { icon: Brain, title: "AI-assisted", copy: "Coop Guard keeps an eye on routine activity and flags what actually needs attention." },
+  { icon: Users, title: "Easy for everyone", copy: "Members interact the way they find easiest, without depending entirely on someone else." },
 ];
 
 const PROBLEMS = [
-  { icon: FileClock, title: "Manual records", copy: "Paper and fragmented spreadsheets make information easy to lose and hard to verify." },
-  { icon: Eye, title: "Limited visibility", copy: "Members often can't see an accurate, up-to-date picture of their own contributions." },
-  { icon: ListChecks, title: "Administrative burden", copy: "Treasurers and secretaries lose hours to repetitive tasks that software can absorb." },
-  { icon: Users, title: "Physical dependency", copy: "Meetings and paperwork cost members time, transport, and sometimes personal safety." },
-  { icon: Link2, title: "Fragmented operations", copy: "Finance and governance run in separate systems, so nothing reconciles automatically." },
+  { icon: FileClock, title: "Too much paperwork", copy: "Paper and scattered spreadsheets make information easy to lose and hard to check." },
+  { icon: Eye, title: "Inaccurate, scattered records", copy: "Members often can't see an accurate, up-to-date picture of their own savings." },
+  { icon: ListChecks, title: "Slow loan processing", copy: "Treasurers and secretaries lose hours to repetitive tasks that software can handle." },
+  { icon: Users, title: "Difficult member communication", copy: "Meetings and paperwork cost members time, transport, and sometimes personal safety." },
+  { icon: Link2, title: "Financial risks and fraud", copy: "Finance and governance run in separate systems, so nothing is checked automatically." },
 ];
 
 const NEW_GAPS = [
   {
     audience: "For administrators",
     icon: BarChart3,
-    headline: "Too much information. Too much manual monitoring.",
-    copy: "Digitizing records didn't remove the workload — it just moved it onto a screen. Administrators still have to look at everything themselves to know what needs attention.",
+    headline: "Still too much to watch and check by hand.",
+    copy: "Moving to a screen didn't remove the work — it just moved it. Administrators still have to look at everything themselves to know what needs their attention.",
   },
   {
     audience: "For members",
     icon: ScanEye,
-    headline: "Digital access does not always mean digital independence.",
+    headline: "Having an app isn't the same as feeling in control.",
     copy: "Some members can open an app but still can't confidently find, understand, or act on their own cooperative information without asking someone else.",
   },
 ];
@@ -205,13 +205,13 @@ const ECOSYSTEM_NODES = [
 ];
 
 const FEATURES = [
-  { icon: Wallet, title: "Contributions & Savings", copy: "Digitally track every contribution and savings balance as it happens, not at month-end." },
-  { icon: Landmark, title: "Loan Management", copy: "Run requests, assessment, approval and repayment through one consistent workflow." },
-  { icon: Gauge, title: "Credit Scoring", copy: "Generate a transparent member credit profile from cooperative activity to guide lending decisions." },
+  { icon: Wallet, title: "Manage Savings", copy: "Track every member's contributions and balances easily, as they happen." },
+  { icon: Landmark, title: "Manage Loans", copy: "Handle applications, approvals and repayments in one place, from request to payoff." },
+  { icon: Users, title: "Manage Members", copy: "Keep member information organized, accurate and easy to find." },
+  { icon: MessageSquareText, title: "Keep Everyone Connected", copy: "Give members simple access to their cooperative services and information." },
+  { icon: Gauge, title: "Credit Scoring", copy: "See a clear picture of a member's borrowing history to guide lending decisions." },
   { icon: BarChart3, title: "Financial Monitoring", copy: "Give committees a live, accurate view of cooperative finances at any moment." },
-  { icon: ShieldCheck, title: "Transaction Audit Trails", copy: "Every meaningful action is written to a tamper-evident, hash-chained ledger." },
   { icon: Vote, title: "Digital Governance", copy: "Hold meetings, votes and member discussions without requiring everyone in one room." },
-  { icon: MessageSquareText, title: "Reports & Insights", copy: "Turn raw cooperative data into summaries administrators can act on quickly." },
 ];
 
 // Cooperative Credit Scoring — conceptual example data (demonstration only).
@@ -231,6 +231,14 @@ const CREDIT_STATS = [
 ];
 
 const AI_FLOW = ["Monitor", "Analyze", "Identify", "Recommend", "Human Approval", "Execute", "Audit"];
+
+const AI_EXAMPLE_QUERIES = [
+  "How much have I saved?",
+  "Can I apply for a ₦200,000 loan?",
+  "Show me members with overdue loans.",
+  "Why was my loan application flagged?",
+  "Send a reminder to these members.",
+];
 
 const AI_CAPABILITIES = [
   { title: "Loan Operations", copy: "Reviews authorized loan information and prepares a recommendation for the loan officer." },
@@ -325,10 +333,12 @@ const SECURITY_POINTS = [
   { icon: Fingerprint, title: "Role-based access", copy: "Members, loan officers and administrators each see only what their role permits." },
   { icon: ShieldCheck, title: "Secure records", copy: "Cooperative data is stored and handled with dedicated safeguards, not open spreadsheets." },
   { icon: FileClock, title: "Transaction traceability", copy: "Financial activity can be traced back to when and how it happened." },
-  { icon: Link2, title: "Hash-chained audit trail", copy: "Each ledger entry is linked to the one before it, making silent edits evident." },
+  { icon: Link2, title: "Tamper-evident records", copy: "Each record is linked to the one before it, so silent edits are easy to catch." },
   { icon: Users, title: "Human oversight", copy: "Sensitive decisions stay with authorized people. The agent recommends; it doesn't decide." },
   { icon: Eye, title: "Controlled AI actions", copy: "Every automated action the agent takes is logged and reviewable, not hidden." },
 ];
+
+const BUSINESS_MODEL_TIERS = ["Cooperative A", "Cooperative B", "Cooperative C"];
 
 /* ------------------------------------------------------------------ */
 /*  Section components                                                 */
@@ -467,32 +477,31 @@ function Hero({ onNavigate }) {
   return (
     <section id="home" className="cgl-hero">
       <div className="cgl-hero-copy">
-        <p className="cgl-eyebrow">AI-powered cooperative management</p>
+        <p className="cgl-eyebrow">For cooperative societies</p>
         <h1>
-          Making Cooperative Management Smarter.
+          Manage Your Cooperative.
           <br />
-          Making Membership Simpler.
+          Smarter.
         </h1>
         <p className="cgl-hero-typed">
           <span className="cgl-mono">{typed}</span>
           <span className="cgl-caret" aria-hidden="true" />
         </p>
         <p className="cgl-hero-sub">
-          Coop Guard combines intelligent AI-powered operations with an inclusive member
-          experience — helping cooperatives reduce administrative workload, improve
-          transparency and make financial information easier for every member to access
-          and understand.
+          Coop Guard helps cooperative societies manage members, savings, loans and
+          everyday operations — with an AI assistant that helps people get things
+          done faster.
         </p>
         <div className="cgl-hero-cta">
-          <button className="cgl-btn cgl-btn-primary cgl-btn-lg" onClick={() => onNavigate("/app")}>
-            Explore Coop Guard <ChevronRight size={16} />
-          </button>
-          <a className="cgl-btn cgl-btn-ghost cgl-btn-lg" href="#how-it-works">
-            See How It Works
+          <a className="cgl-btn cgl-btn-primary cgl-btn-lg" href="#how-it-works">
+            See How It Works <ChevronRight size={16} />
           </a>
+          <button className="cgl-btn cgl-btn-ghost cgl-btn-lg" onClick={() => onNavigate("/app")}>
+            Join the Pilot
+          </button>
         </div>
         <div className="cgl-hero-loop" aria-hidden="true">
-          <span>Monitor</span>
+          <span>Manage</span>
           <ArrowRight size={13} />
           <span>Understand</span>
           <ArrowRight size={13} />
@@ -539,7 +548,7 @@ function Problem() {
     <RevealSection id="problem" className="cgl-problem">
       <div className="cgl-section-head">
         <p className="cgl-eyebrow">The problem</p>
-        <h2>Cooperative management shouldn't depend on paperwork and physical processes.</h2>
+        <h2>Running a Cooperative Shouldn't Be This Difficult.</h2>
       </div>
       <div className="cgl-problem-grid">
         {PROBLEMS.map((p) => {
@@ -562,11 +571,11 @@ function Gaps() {
     <RevealSection className="cgl-gaps">
       <div className="cgl-section-head">
         <p className="cgl-eyebrow">What we found</p>
-        <h2>Digitizing the cooperative was only the first step.</h2>
+        <h2>Going digital alone doesn't solve everything.</h2>
         <p className="cgl-section-copy">
-          Several existing platforms already help cooperatives move contributions,
-          savings and voting online. Talking to administrators and members told us
-          that digitizing records alone leaves two gaps unaddressed.
+          Other tools already help cooperatives move records online. But talking to
+          administrators and members showed us that putting records on a screen still
+          leaves two problems unsolved.
         </p>
       </div>
       <div className="cgl-gaps-grid">
@@ -590,24 +599,24 @@ function Opportunity({ onNavigate }) {
   return (
     <RevealSection id="opportunity" className="cgl-opportunity">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">The opportunity</p>
-        <h2>Coop Guard goes further — intelligent operations, inclusive experience.</h2>
+        <p className="cgl-eyebrow">Who it's for</p>
+        <h2>Less work for leaders. Less stress for members.</h2>
         <p className="cgl-section-copy">
-          AI handles the routine. Humans control the decisions. Members stay informed
-          and in control.
+          AI handles the routine watching and checking. People stay informed and in
+          control — whether they're running the cooperative or simply saving with it.
         </p>
       </div>
       <div className="cgl-opportunity-grid">
         <a href="#ai" className="cgl-opportunity-card">
-          <span className="cgl-opportunity-tag">Administrator</span>
-          <h3>AI Operations</h3>
-          <p>Routine monitoring is handled automatically. Administrators focus on the
-            activities that actually need a human decision.</p>
+          <span className="cgl-opportunity-tag">For cooperative leaders</span>
+          <h3>Less Work. Better Control.</h3>
+          <p>Routine monitoring is handled automatically, so administrators can focus
+            on the decisions that actually need a human.</p>
           <span className="cgl-feature-more">See how <ArrowUpRight size={14} /></span>
         </a>
         <a href="#members" className="cgl-opportunity-card cgl-opportunity-card--accent">
-          <span className="cgl-opportunity-tag">Member</span>
-          <h3>Assisted Independence</h3>
+          <span className="cgl-opportunity-tag">For members</span>
+          <h3>Everything You Need, Without the Stress.</h3>
           <p>Members access and understand their own information — with guided support
             when they need it, never a loss of control.</p>
           <span className="cgl-feature-more">See how <ArrowUpRight size={14} /></span>
@@ -623,12 +632,12 @@ function Solution() {
   return (
     <RevealSection id="solution" className="cgl-solution">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">The platform</p>
-        <h2>One digital ecosystem for modern cooperative operations.</h2>
+        <p className="cgl-eyebrow">Meet Coop Guard</p>
+        <h2>One platform for the entire cooperative.</h2>
         <p className="cgl-section-copy">
-          Coop Guard centralizes the activities that used to live across notebooks, phone calls
-          and separate spreadsheets — so every part of the cooperative connects to the same
-          source of truth.
+          Coop Guard brings together everything that used to live across notebooks, phone
+          calls and separate spreadsheets — members, savings, loans and governance — in one
+          place everyone can trust.
         </p>
       </div>
 
@@ -672,7 +681,7 @@ function Features() {
   return (
     <RevealSection id="features" className="cgl-features">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Core features</p>
+        <p className="cgl-eyebrow">What Coop Guard does</p>
         <h2>Everything a cooperative runs on, in one place.</h2>
       </div>
       <div className="cgl-features-grid">
@@ -696,14 +705,21 @@ function AIAgent() {
   return (
     <RevealSection id="ai" className="cgl-ai">
       <div className="cgl-section-head cgl-section-head--light">
-        <p className="cgl-eyebrow cgl-eyebrow--light">AI operations · for administrators</p>
-        <h2>Meet the Coop Guard AI Operations Agent</h2>
+        <p className="cgl-eyebrow cgl-eyebrow--light">The AI assistant</p>
+        <h2>Just Ask Coop Guard.</h2>
         <p className="cgl-section-copy cgl-section-copy--light">
-          Instead of requiring administrators to manually monitor every activity, the
-          agent continuously analyzes cooperative operations, identifies what requires
-          attention and assists with appropriate routine tasks — while authorized humans
-          remain in control of important decisions.
+          Instead of digging through menus and spreadsheets, members and administrators
+          can simply ask. Coop Guard understands the request, finds the answer, and helps
+          get things done — while people stay in control of anything important.
         </p>
+      </div>
+
+      <div className="cgl-voice-modes" style={{ justifyContent: "center", marginBottom: "1.5rem" }}>
+        {AI_EXAMPLE_QUERIES.map((q) => (
+          <span key={q} className="cgl-voice-mode" style={{ cursor: "default" }}>
+            "{q}"
+          </span>
+        ))}
       </div>
 
       <div className="cgl-flow">
@@ -799,13 +815,12 @@ function CreditScoreSection() {
   return (
     <RevealSection id="credit-scoring" className="cgl-credit">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Smart credit scoring</p>
-        <h2>Track behaviour. Understand risk. Lend with confidence.</h2>
+        <p className="cgl-eyebrow">Faster loan decisions</p>
+        <h2>Check loan eligibility faster, with people still in control.</h2>
         <p className="cgl-section-copy">
-          Coop Guard is not a bank or a credit bureau. It's a cooperative credit
-          scoring system that turns a member's contribution and repayment activity
-          into a transparent profile — helping administrators answer one question:
-          can this member responsibly handle another cooperative loan?
+          Coop Guard is not a bank or a credit bureau. It turns a member's savings and
+          repayment history into a simple, clear profile — helping administrators answer
+          one question: can this member responsibly handle another cooperative loan?
         </p>
       </div>
 
@@ -912,11 +927,12 @@ function HumanControlled() {
   return (
     <RevealSection className="cgl-human">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Human-controlled AI</p>
-        <h2>AI assists. Humans decide.</h2>
+        <p className="cgl-eyebrow">You're always in control</p>
+        <h2>AI Helps. People Stay in Control.</h2>
         <p className="cgl-section-copy">
           Every AI recommendation passes through an authorized administrator before
-          anything happens. Nothing is executed automatically on a member's account.
+          anything happens. Nothing is executed automatically on a member's account —
+          sensitive financial decisions always stay with a person.
         </p>
       </div>
       <div className="cgl-human-flow">
@@ -943,12 +959,11 @@ function MemberExperience() {
   return (
     <RevealSection id="members" className="cgl-member">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Member experience</p>
-        <h2>Digital doesn't have to mean difficult.</h2>
+        <p className="cgl-eyebrow">For members</p>
+        <h2>Everything You Need, Without the Stress.</h2>
         <p className="cgl-section-copy">
-          Coop Guard is designed so members can access and understand their cooperative
-          information without needing advanced digital skills or depending entirely on
-          another person.
+          Check your savings, view your loans, track repayments, and get help — all
+          without needing advanced digital skills or depending entirely on another person.
         </p>
       </div>
       <div className="cgl-member-grid">
@@ -1005,21 +1020,22 @@ function VoiceInteraction() {
   return (
     <RevealSection className="cgl-voice">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Inclusive interaction</p>
-        <h2>Talk to Coop Guard.</h2>
+        <p className="cgl-eyebrow">Built for everyone</p>
+        <h2>Technology Shouldn't Be a Barrier.</h2>
         <p className="cgl-section-copy">
-          Coop Guard is designed around how people actually interact, rather than
-          forcing every member to understand complex software.
+          Coop Guard is designed for people with different levels of digital experience —
+          simple language, easy navigation, and conversational interaction, so no member
+          is left behind.
         </p>
       </div>
       <div className="cgl-voice-demo">
         <div className="cgl-voice-bubble cgl-voice-bubble--member">
           <span className="cgl-voice-tag">Member</span>
-          <p>"How much have I saved?"</p>
+          <p>"Ina son sanin ko zan iya karbar bashi." (Hausa)</p>
         </div>
         <div className="cgl-voice-bubble cgl-voice-bubble--agent">
           <span className="cgl-voice-tag">Coop Guard</span>
-          <p>"You currently have ₦125,000 in savings."</p>
+          <p>"Yes — based on your savings history, you can apply for a loan. Want me to start it?"</p>
         </div>
         <div className="cgl-voice-modes">
           {VOICE_MODES.map((m, i) => {
@@ -1179,8 +1195,8 @@ function Compare() {
   return (
     <RevealSection className="cgl-compare">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Why Coop Guard</p>
-        <h2>The same cooperative, run a better way.</h2>
+        <p className="cgl-eyebrow">More Than Digital Records</p>
+        <h2>We don't just help cooperatives store information. We help them use it.</h2>
       </div>
       <div className="cgl-compare-grid">
         <div className="cgl-compare-col">
@@ -1215,7 +1231,7 @@ function Security() {
     <RevealSection className="cgl-security">
       <div className="cgl-section-head">
         <p className="cgl-eyebrow">Security &amp; accountability</p>
-        <h2>Built around transparency and accountability.</h2>
+        <h2>Built for Trust.</h2>
       </div>
       <div className="cgl-security-grid">
         {SECURITY_POINTS.map((s) => {
@@ -1235,17 +1251,59 @@ function Security() {
   );
 }
 
+function BusinessModel() {
+  return (
+    <RevealSection className="cgl-opportunity">
+      <div className="cgl-section-head">
+        <p className="cgl-eyebrow">How Coop Guard works</p>
+        <h2>Built for Cooperatives.</h2>
+        <p className="cgl-section-copy">
+          Coop Guard is the technology provider. Existing cooperative societies
+          subscribe to the platform and use it to manage their operations and members —
+          Coop Guard itself is not a cooperative society.
+        </p>
+      </div>
+      <div className="cgl-human-flow" style={{ flexDirection: "column", gap: "0.75rem" }}>
+        <div className="cgl-human-step">
+          <span className="cgl-human-step-icon"><ShieldCheck size={18} strokeWidth={2.2} /></span>
+          <span>Coop Guard (the platform)</span>
+        </div>
+        <span className="cgl-flow-arrow" aria-hidden="true">↓</span>
+        <div className="cgl-human-flow" style={{ flexWrap: "wrap", justifyContent: "center" }}>
+          {BUSINESS_MODEL_TIERS.map((t, i) => (
+            <React.Fragment key={t}>
+              <div className="cgl-human-step">
+                <span className="cgl-human-step-icon"><Landmark size={18} strokeWidth={2.2} /></span>
+                <span>{t}</span>
+              </div>
+              {i < BUSINESS_MODEL_TIERS.length - 1 && <span className="cgl-flow-arrow" aria-hidden="true"> </span>}
+            </React.Fragment>
+          ))}
+        </div>
+        <span className="cgl-flow-arrow" aria-hidden="true">↓</span>
+        <div className="cgl-human-step">
+          <span className="cgl-human-step-icon"><Users size={18} strokeWidth={2.2} /></span>
+          <span>Their members</span>
+        </div>
+      </div>
+    </RevealSection>
+  );
+}
+
 function FinalCTA({ onNavigate }) {
   return (
     <RevealSection className="cgl-final">
-      <h2>The Future of Cooperative Management Should Work for Everyone.</h2>
-      <p>Smarter for administrators. Simpler for members. Transparent for everyone.</p>
+      <h2>Making Cooperative Services Easier for Everyone.</h2>
+      <p>
+        A future where joining, managing and participating in a cooperative is as
+        simple as using your phone — starting in Nigeria, with room to grow across Africa.
+      </p>
       <div className="cgl-final-cta">
-        <button className="cgl-btn cgl-btn-primary cgl-btn-lg" onClick={() => onNavigate("/app")}>
-          Explore Coop Guard <ChevronRight size={16} />
-        </button>
+        <a className="cgl-btn cgl-btn-primary cgl-btn-lg" href="#how-it-works">
+          See How It Works <ChevronRight size={16} />
+        </a>
         <button className="cgl-btn cgl-btn-outline cgl-btn-lg" onClick={() => onNavigate("/app")}>
-          Get Started
+          Join the Pilot
         </button>
       </div>
     </RevealSection>
@@ -1291,21 +1349,22 @@ export default function Landing({ onNavigate }) {
       <ValueProps />
       <Problem />
       <Gaps />
-      <Opportunity onNavigate={navigate} />
       <Solution />
       <Features />
+      <Opportunity onNavigate={navigate} />
       <AIAgent />
       <CreditScoreSection />
       <ExceptionDashboard />
       <HumanControlled />
+      <VoiceInteraction />
       <MemberExperience />
       <AssistedIndependence />
-      <VoiceInteraction />
       <TransparencyReceipt />
       <HowItWorks />
-      <TeamSection />
       <Compare />
       <Security />
+      <BusinessModel />
+      <TeamSection />
       <FinalCTA onNavigate={navigate} />
       <Footer />
       <LandingStyles />
