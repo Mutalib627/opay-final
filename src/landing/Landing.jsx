@@ -6,11 +6,9 @@ import {
   Landmark,
   ListChecks,
   MessageSquareText,
-  BarChart3,
   Link2,
   Eye,
   Brain,
-  Zap,
   ArrowUpRight,
   ArrowRight,
   Bell,
@@ -22,19 +20,18 @@ import {
   ChevronLeft,
   FileClock,
   Fingerprint,
-  Vote,
   Mic,
   Globe2,
-  LifeBuoy,
-  UserCheck,
+  Vote,
+  Gauge,
   PiggyBank,
   CalendarClock,
-  HelpCircle,
-  Sparkles,
-  ScanEye,
-  Gauge,
+  Target,
   TrendingUp,
   Award,
+  Twitter,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -169,13 +166,6 @@ const TYPED_PHRASES = [
   "Transparent. Intelligent. Inclusive.",
 ];
 
-const VALUE_PROPS = [
-  { icon: Link2, title: "All in one place", copy: "Contributions, loans, repayments and governance — in one system instead of scattered records." },
-  { icon: Eye, title: "Transparent", copy: "Every record and action is traceable, so members always know where their money stands." },
-  { icon: Brain, title: "AI-assisted", copy: "Coop Guard keeps an eye on routine activity and flags what actually needs attention." },
-  { icon: Users, title: "Easy for everyone", copy: "Members interact the way they find easiest, without depending entirely on someone else." },
-];
-
 const PROBLEMS = [
   { icon: FileClock, title: "Too much paperwork", copy: "Paper and scattered spreadsheets make information easy to lose and hard to check." },
   { icon: Eye, title: "Inaccurate, scattered records", copy: "Members often can't see an accurate, up-to-date picture of their own savings." },
@@ -184,34 +174,31 @@ const PROBLEMS = [
   { icon: Link2, title: "Financial risks and fraud", copy: "Finance and governance run in separate systems, so nothing is checked automatically." },
 ];
 
-const NEW_GAPS = [
-  {
-    audience: "For administrators",
-    icon: BarChart3,
-    headline: "Still too much to watch and check by hand.",
-    copy: "Moving to a screen didn't remove the work — it just moved it. Administrators still have to look at everything themselves to know what needs their attention.",
-  },
-  {
-    audience: "For members",
-    icon: ScanEye,
-    headline: "Having an app isn't the same as feeling in control.",
-    copy: "Some members can open an app but still can't confidently find, understand, or act on their own cooperative information without asking someone else.",
-  },
+const ECOSYSTEM_NODES = [
+  "Members", "Contributions", "Savings", "Loans", "Credit Scoring",
+  "Repayments", "Governance", "Reports", "Insights",
 ];
 
-const ECOSYSTEM_NODES = [
-  "Members", "Contributions", "Savings", "Loans",
-  "Repayments", "Transactions", "Governance", "Reports",
+const DIFFERENTIATORS = [
+  { icon: Brain, title: "AI-Powered Operations", copy: "AI helps automate repetitive cooperative tasks and surfaces useful operational insights." },
+  { icon: Gauge, title: "Intelligent Credit Scoring", copy: "Evaluates members using their financial and contribution data before loan decisions." },
+  { icon: Globe2, title: "Inclusive Access", copy: "Simple interfaces, voice and local-language support for members with limited digital literacy." },
+  { icon: ShieldCheck, title: "Fraud & Risk Monitoring", copy: "Helps administrators spot unusual activity and potential risks early." },
+  { icon: Vote, title: "Digital Governance", copy: "Transparent voting, communication, meetings and cooperative decision-making." },
+];
+
+const HOW_IT_WORKS = [
+  { n: "01", title: "Create your cooperative", copy: "Set up your cooperative on Coop Guard in minutes." },
+  { n: "02", title: "Add and manage members", copy: "Bring your members onto the platform and keep their records organized." },
+  { n: "03", title: "Manage savings, contributions and loans", copy: "Run day-to-day operations from one connected dashboard." },
+  { n: "04", title: "Monitor performance and decide", copy: "Track cooperative health and make better, informed decisions." },
 ];
 
 const FEATURES = [
+  { icon: Users, title: "Manage Members", copy: "Keep member information organized, accurate and easy to find." },
   { icon: Wallet, title: "Manage Savings", copy: "Track every member's contributions and balances easily, as they happen." },
   { icon: Landmark, title: "Manage Loans", copy: "Handle applications, approvals and repayments in one place, from request to payoff." },
-  { icon: Users, title: "Manage Members", copy: "Keep member information organized, accurate and easy to find." },
   { icon: MessageSquareText, title: "Keep Everyone Connected", copy: "Give members simple access to their cooperative services and information." },
-  { icon: Gauge, title: "Credit Scoring", copy: "See a clear picture of a member's borrowing history to guide lending decisions." },
-  { icon: BarChart3, title: "Financial Monitoring", copy: "Give committees a live, accurate view of cooperative finances at any moment." },
-  { icon: Vote, title: "Digital Governance", copy: "Hold meetings, votes and member discussions without requiring everyone in one room." },
 ];
 
 // Cooperative Credit Scoring — conceptual example data (demonstration only).
@@ -262,31 +249,17 @@ const MEMBER_CARDS = [
   { icon: CalendarClock, label: "Next Repayment", value: "5 September", sub: "Reminder set" },
 ];
 
-const ASSISTED_INDEPENDENCE_FLOW = [
-  { icon: Users, label: "Member" },
-  { icon: LifeBuoy, label: "Guided Assistance" },
-  { icon: UserCheck, label: "Member Confirmation" },
-  { icon: ShieldCheck, label: "Secure Action" },
-];
-
 const VOICE_MODES = [
   { icon: Mic, label: "Voice" },
   { icon: Eye, label: "Simple Visuals" },
   { icon: Globe2, label: "Local Language" },
 ];
 
-const HOW_IT_WORKS = [
-  { n: "01", title: "Join", copy: "Create an account and join your cooperative in minutes." },
-  { n: "02", title: "Participate", copy: "Manage contributions, loans and cooperative activity from your dashboard." },
-  { n: "03", title: "Monitor", copy: "Coop Guard Intelligence continuously watches routine activity for you." },
-  { n: "04", title: "Decide", copy: "The agent prepares recommendations. Authorized humans make the final call." },
-];
-
 const ABOUT_MISSION = "Coop Guard is built by a small, multidisciplinary team combining product research, software engineering, design and financial-inclusion thinking. We're united by one goal: making cooperative societies more transparent, efficient, secure and accessible for every member — from committee administrators to first-time savers.";
 
 const ABOUT_STATS = [
   { icon: Users, value: 5, suffix: "", label: "Founding team members" },
-  { icon: Sparkles, value: 1, suffix: "", label: "Shared product vision" },
+  { icon: Target, value: 1, suffix: "", label: "Shared product vision" },
   { icon: Award, value: 100, suffix: "%", label: "Human-controlled decisions" },
 ];
 
@@ -332,13 +305,50 @@ const COMPARE = {
 const SECURITY_POINTS = [
   { icon: Fingerprint, title: "Role-based access", copy: "Members, loan officers and administrators each see only what their role permits." },
   { icon: ShieldCheck, title: "Secure records", copy: "Cooperative data is stored and handled with dedicated safeguards, not open spreadsheets." },
-  { icon: FileClock, title: "Transaction traceability", copy: "Financial activity can be traced back to when and how it happened." },
-  { icon: Link2, title: "Tamper-evident records", copy: "Each record is linked to the one before it, so silent edits are easy to catch." },
-  { icon: Users, title: "Human oversight", copy: "Sensitive decisions stay with authorized people. The agent recommends; it doesn't decide." },
-  { icon: Eye, title: "Controlled AI actions", copy: "Every automated action the agent takes is logged and reviewable, not hidden." },
+  { icon: FileClock, title: "Full traceability", copy: "Financial activity can always be traced back to when and how it happened." },
+  { icon: Eye, title: "Nothing hidden", copy: "Every automated action Coop Guard takes is logged and reviewable." },
 ];
 
 const BUSINESS_MODEL_TIERS = ["Cooperative A", "Cooperative B", "Cooperative C"];
+
+const FOOTER_COLUMNS = [
+  {
+    heading: "Product",
+    links: [
+      { label: "Features", href: "#solution" },
+      { label: "How It Works", href: "#how-it-works" },
+      { label: "AI Assistant", href: "#ai" },
+      { label: "Credit Scoring", href: "#credit-scoring" },
+      { label: "Cooperative Management", href: "#members" },
+      { label: "Security", href: "#trust" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About Us", href: "#team" },
+      { label: "Our Team", href: "#team" },
+      { label: "Resources", href: "#" },
+      { label: "Contact", href: "#" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "#" },
+      { label: "Terms of Service", href: "#" },
+      { label: "Cookie Policy", href: "#" },
+      { label: "Security & Compliance", href: "#" },
+      { label: "Delete Account", href: "#" },
+    ],
+  },
+];
+
+const FOOTER_SOCIAL = [
+  { icon: Twitter, label: "X", href: "#" },
+  { icon: Instagram, label: "Instagram", href: "#" },
+  { icon: Linkedin, label: "LinkedIn", href: "#" },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Section components                                                 */
@@ -356,11 +366,10 @@ function Nav({ onNavigate }) {
   }, []);
 
   const links = [
-    { href: "#home", label: "Home" },
-    { href: "#ai", label: "For Administrators" },
-    { href: "#credit-scoring", label: "Credit Scoring" },
+    { href: "#solution", label: "Product" },
+    { href: "#different", label: "Why Coop Guard" },
+    { href: "#ai", label: "AI Assistant" },
     { href: "#members", label: "For Members" },
-    { href: "#how-it-works", label: "How It Works" },
     { href: "#team", label: "About" },
   ];
 
@@ -493,12 +502,12 @@ function Hero({ onNavigate }) {
           done faster.
         </p>
         <div className="cgl-hero-cta">
-          <a className="cgl-btn cgl-btn-primary cgl-btn-lg" href="#how-it-works">
-            See How It Works <ChevronRight size={16} />
-          </a>
-          <button className="cgl-btn cgl-btn-ghost cgl-btn-lg" onClick={() => onNavigate("/app")}>
-            Join the Pilot
+          <button className="cgl-btn cgl-btn-primary cgl-btn-lg" onClick={() => onNavigate("/app")}>
+            Get Started <ChevronRight size={16} />
           </button>
+          <a className="cgl-btn cgl-btn-ghost cgl-btn-lg" href="#solution">
+            Explore CoopGuard
+          </a>
         </div>
         <div className="cgl-hero-loop" aria-hidden="true">
           <span>Manage</span>
@@ -510,25 +519,6 @@ function Hero({ onNavigate }) {
       </div>
       <div className="cgl-hero-visual">
         <LedgerPreview />
-      </div>
-    </section>
-  );
-}
-
-function ValueProps() {
-  return (
-    <section className="cgl-values">
-      <div className="cgl-values-grid">
-        {VALUE_PROPS.map((v) => {
-          const Icon = v.icon;
-          return (
-            <div className="cgl-value" key={v.title}>
-              <span className="cgl-value-icon"><Icon size={20} strokeWidth={2.2} /></span>
-              <h3>{v.title}</h3>
-              <p>{v.copy}</p>
-            </div>
-          );
-        })}
       </div>
     </section>
   );
@@ -566,40 +556,11 @@ function Problem() {
   );
 }
 
-function Gaps() {
-  return (
-    <RevealSection className="cgl-gaps">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">What we found</p>
-        <h2>Going digital alone doesn't solve everything.</h2>
-        <p className="cgl-section-copy">
-          Other tools already help cooperatives move records online. But talking to
-          administrators and members showed us that putting records on a screen still
-          leaves two problems unsolved.
-        </p>
-      </div>
-      <div className="cgl-gaps-grid">
-        {NEW_GAPS.map((g) => {
-          const Icon = g.icon;
-          return (
-            <div className="cgl-gap-card" key={g.audience}>
-              <span className="cgl-gap-audience">{g.audience}</span>
-              <span className="cgl-gap-icon"><Icon size={20} strokeWidth={2.2} /></span>
-              <h3>{g.headline}</h3>
-              <p>{g.copy}</p>
-            </div>
-          );
-        })}
-      </div>
-    </RevealSection>
-  );
-}
-
 function Opportunity({ onNavigate }) {
   return (
-    <RevealSection id="opportunity" className="cgl-opportunity">
+    <RevealSection id="members" className="cgl-opportunity">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Who it's for</p>
+        <p className="cgl-eyebrow">Built for leaders &amp; members</p>
         <h2>Less work for leaders. Less stress for members.</h2>
         <p className="cgl-section-copy">
           AI handles the routine watching and checking. People stay informed and in
@@ -614,13 +575,25 @@ function Opportunity({ onNavigate }) {
             on the decisions that actually need a human.</p>
           <span className="cgl-feature-more">See how <ArrowUpRight size={14} /></span>
         </a>
-        <a href="#members" className="cgl-opportunity-card cgl-opportunity-card--accent">
+        <div className="cgl-opportunity-card cgl-opportunity-card--accent">
           <span className="cgl-opportunity-tag">For members</span>
           <h3>Everything You Need, Without the Stress.</h3>
-          <p>Members access and understand their own information — with guided support
-            when they need it, never a loss of control.</p>
-          <span className="cgl-feature-more">See how <ArrowUpRight size={14} /></span>
-        </a>
+          <p>Check your savings, view your loans, track repayments, and get help — all
+            without needing advanced digital skills or depending on another person.</p>
+        </div>
+      </div>
+      <div className="cgl-member-grid">
+        {MEMBER_CARDS.map((c) => {
+          const Icon = c.icon;
+          return (
+            <div className="cgl-member-card" key={c.label}>
+              <span className="cgl-member-icon"><Icon size={18} strokeWidth={2.2} /></span>
+              <span className="cgl-member-label">{c.label}</span>
+              <span className={`cgl-member-value cgl-mono ${c.tone === "ok" ? "cgl-ok" : ""}`}>{c.value}</span>
+              <span className="cgl-member-sub">{c.sub}</span>
+            </div>
+          );
+        })}
       </div>
     </RevealSection>
   );
@@ -673,17 +646,7 @@ function Solution() {
           );
         })}
       </div>
-    </RevealSection>
-  );
-}
 
-function Features() {
-  return (
-    <RevealSection id="features" className="cgl-features">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">What Coop Guard does</p>
-        <h2>Everything a cooperative runs on, in one place.</h2>
-      </div>
       <div className="cgl-features-grid">
         {FEATURES.map((f) => {
           const Icon = f.icon;
@@ -692,10 +655,52 @@ function Features() {
               <span className="cgl-feature-icon"><Icon size={20} strokeWidth={2.2} /></span>
               <h3>{f.title}</h3>
               <p>{f.copy}</p>
-              <span className="cgl-feature-more">Learn more <ArrowUpRight size={14} /></span>
             </div>
           );
         })}
+      </div>
+    </RevealSection>
+  );
+}
+
+function Differentiators() {
+  return (
+    <RevealSection id="different" className="cgl-features">
+      <div className="cgl-section-head">
+        <p className="cgl-eyebrow">Why Coop Guard</p>
+        <h2>What Makes Coop Guard Different?</h2>
+      </div>
+      <div className="cgl-features-grid">
+        {DIFFERENTIATORS.map((d) => {
+          const Icon = d.icon;
+          return (
+            <div className="cgl-feature-card" key={d.title}>
+              <span className="cgl-feature-icon"><Icon size={20} strokeWidth={2.2} /></span>
+              <h3>{d.title}</h3>
+              <p>{d.copy}</p>
+            </div>
+          );
+        })}
+      </div>
+    </RevealSection>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <RevealSection id="how-it-works" className="cgl-how">
+      <div className="cgl-section-head">
+        <p className="cgl-eyebrow">How it works</p>
+        <h2>From sign-up to better decisions.</h2>
+      </div>
+      <div className="cgl-how-grid">
+        {HOW_IT_WORKS.map((s) => (
+          <div className="cgl-how-step" key={s.n}>
+            <span className="cgl-how-num cgl-mono">{s.n}</span>
+            <h3>{s.title}</h3>
+            <p>{s.copy}</p>
+          </div>
+        ))}
       </div>
     </RevealSection>
   );
@@ -815,13 +820,28 @@ function CreditScoreSection() {
   return (
     <RevealSection id="credit-scoring" className="cgl-credit">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Faster loan decisions</p>
-        <h2>Check loan eligibility faster, with people still in control.</h2>
+        <p className="cgl-eyebrow">Real AI loan example</p>
+        <h2>Ask Coop Guard instead of searching through menus.</h2>
         <p className="cgl-section-copy">
-          Coop Guard is not a bank or a credit bureau. It turns a member's savings and
-          repayment history into a simple, clear profile — helping administrators answer
-          one question: can this member responsibly handle another cooperative loan?
+          Coop Guard checks a member's savings and repayment history, then gives
+          administrators a clear recommendation — not a decision. Here's what that
+          looks like in practice.
         </p>
+      </div>
+
+      <div className="cgl-voice-demo" style={{ marginBottom: "1.5rem" }}>
+        <div className="cgl-voice-bubble cgl-voice-bubble--member">
+          <span className="cgl-voice-tag">Member</span>
+          <p>"How much have I saved?"</p>
+        </div>
+        <div className="cgl-voice-bubble cgl-voice-bubble--agent">
+          <span className="cgl-voice-tag">Coop Guard</span>
+          <p>"You have saved ₦85,000."</p>
+        </div>
+        <div className="cgl-voice-bubble cgl-voice-bubble--member">
+          <span className="cgl-voice-tag">Member</span>
+          <p>"Can I apply for a ₦200,000 loan?"</p>
+        </div>
       </div>
 
       <div className="cgl-credit-flow">
@@ -866,10 +886,7 @@ function CreditScoreSection() {
             );
           })}
           <p className="cgl-credit-note">
-            Scores are generated from cooperative records already in Coop Guard —
-            contribution frequency, repayment timeliness and outstanding obligations —
-            to reduce subjective, manual lending decisions. The system recommends;
-            authorized administrators decide.
+            Coop Guard recommends. The loan officer decides.
           </p>
         </div>
       </div>
@@ -877,62 +894,17 @@ function CreditScoreSection() {
   );
 }
 
-function ExceptionDashboard() {
-  const [ref, visible] = useReveal();
-  const total = useCountUp(1284, visible);
-  const normal = useCountUp(1261, visible);
-  const attention = useCountUp(18, visible);
-  const priority = useCountUp(5, visible);
-
-  return (
-    <RevealSection className="cgl-exception">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Exception-based administration</p>
-        <h2>Administrators don't need to manually inspect everything.</h2>
-        <p className="cgl-section-copy">
-          Coop Guard brings the activities that actually require attention to
-          administrators, instead of asking them to review every transaction
-          themselves.
-        </p>
-      </div>
-      <div className={`cgl-exception-panel ${visible ? "is-visible" : ""}`} ref={ref}>
-        <div className="cgl-exception-total">
-          <span className="cgl-mono">{total.toLocaleString()}</span>
-          <span>activities monitored</span>
-        </div>
-        <div className="cgl-exception-rows">
-          <div className="cgl-exception-row">
-            <span className="cgl-exception-dot cgl-exception-dot--ok" />
-            <span className="cgl-exception-row-label">Normal</span>
-            <span className="cgl-mono cgl-exception-row-value cgl-ok">{normal.toLocaleString()}</span>
-          </div>
-          <div className="cgl-exception-row">
-            <span className="cgl-exception-dot cgl-exception-dot--warn" />
-            <span className="cgl-exception-row-label">Attention</span>
-            <span className="cgl-mono cgl-exception-row-value cgl-warn">{attention}</span>
-          </div>
-          <div className="cgl-exception-row">
-            <span className="cgl-exception-dot cgl-exception-dot--risk" />
-            <span className="cgl-exception-row-label">High Priority</span>
-            <span className="cgl-mono cgl-exception-row-value cgl-risk">{priority}</span>
-          </div>
-        </div>
-        <p className="cgl-exception-note">Demonstration data. Figures illustrate how exceptions are surfaced, not live cooperative activity.</p>
-      </div>
-    </RevealSection>
-  );
-}
-
 function HumanControlled() {
   return (
-    <RevealSection className="cgl-human">
+    <RevealSection id="trust" className="cgl-human">
       <div className="cgl-section-head">
-        <p className="cgl-eyebrow">You're always in control</p>
+        <p className="cgl-eyebrow">Built for modern cooperative societies</p>
         <h2>AI Helps. People Stay in Control.</h2>
         <p className="cgl-section-copy">
           Every AI recommendation passes through an authorized administrator before
-          anything happens. Nothing is executed automatically on a member's account —
-          sensitive financial decisions always stay with a person.
+          anything happens. Sensitive financial decisions always stay with a person —
+          every action is logged and can be reviewed. Security, transparency and
+          accountability are built into how Coop Guard works.
         </p>
       </div>
       <div className="cgl-human-flow">
@@ -951,63 +923,17 @@ function HumanControlled() {
           );
         })}
       </div>
-    </RevealSection>
-  );
-}
-
-function MemberExperience() {
-  return (
-    <RevealSection id="members" className="cgl-member">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">For members</p>
-        <h2>Everything You Need, Without the Stress.</h2>
-        <p className="cgl-section-copy">
-          Check your savings, view your loans, track repayments, and get help — all
-          without needing advanced digital skills or depending entirely on another person.
-        </p>
-      </div>
-      <div className="cgl-member-grid">
-        {MEMBER_CARDS.map((c) => {
-          const Icon = c.icon;
+      <div className="cgl-security-grid" style={{ marginTop: "2rem" }}>
+        {SECURITY_POINTS.map((s) => {
+          const Icon = s.icon;
           return (
-            <div className="cgl-member-card" key={c.label}>
-              <span className="cgl-member-icon"><Icon size={18} strokeWidth={2.2} /></span>
-              <span className="cgl-member-label">{c.label}</span>
-              <span className={`cgl-member-value cgl-mono ${c.tone === "ok" ? "cgl-ok" : ""}`}>{c.value}</span>
-              <span className="cgl-member-sub">{c.sub}</span>
-            </div>
-          );
-        })}
-      </div>
-    </RevealSection>
-  );
-}
-
-function AssistedIndependence() {
-  return (
-    <RevealSection className="cgl-assisted">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Assisted independence</p>
-        <h2>Helping Members Stay in Control</h2>
-        <p className="cgl-section-copy">
-          For members who need assistance, Coop Guard provides guided interaction
-          without requiring them to surrender control of their financial information
-          or important actions.
-        </p>
-      </div>
-      <div className="cgl-assisted-flow">
-        {ASSISTED_INDEPENDENCE_FLOW.map((step, i) => {
-          const Icon = step.icon;
-          return (
-            <React.Fragment key={step.label}>
-              <div className="cgl-human-step" style={{ "--d": `${i * 100}ms` }}>
-                <span className="cgl-human-step-icon"><Icon size={18} strokeWidth={2.2} /></span>
-                <span>{step.label}</span>
+            <div className="cgl-security-item" key={s.title}>
+              <span className="cgl-security-icon"><Icon size={17} /></span>
+              <div>
+                <h4>{s.title}</h4>
+                <p>{s.copy}</p>
               </div>
-              {i < ASSISTED_INDEPENDENCE_FLOW.length - 1 && (
-                <span className="cgl-flow-arrow" aria-hidden="true">→</span>
-              )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
@@ -1052,55 +978,6 @@ function VoiceInteraction() {
             );
           })}
         </div>
-      </div>
-    </RevealSection>
-  );
-}
-
-function TransparencyReceipt() {
-  return (
-    <RevealSection className="cgl-receipt">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Transparent by design</p>
-        <h2>Every transaction, understandable and verifiable.</h2>
-        <p className="cgl-section-copy">
-          Every important transaction should be understandable, verifiable and traceable —
-          for the member it belongs to, and for the cooperative as a whole.
-        </p>
-      </div>
-      <div className="cgl-receipt-card">
-        <div className="cgl-receipt-row">
-          <span>Contribution Recorded</span>
-          <span className="cgl-mono">₦5,000</span>
-        </div>
-        <div className="cgl-receipt-row cgl-receipt-row--sub">
-          <span>Status</span>
-          <span className="cgl-mono cgl-ok">Successful</span>
-        </div>
-        <div className="cgl-receipt-row cgl-receipt-row--sub">
-          <span>Reference</span>
-          <span className="cgl-mono">CG-84921</span>
-        </div>
-      </div>
-    </RevealSection>
-  );
-}
-
-function HowItWorks() {
-  return (
-    <RevealSection id="how-it-works" className="cgl-how">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">How it works</p>
-        <h2>From sign-up to an informed decision.</h2>
-      </div>
-      <div className="cgl-how-grid">
-        {HOW_IT_WORKS.map((s) => (
-          <div className="cgl-how-step" key={s.n}>
-            <span className="cgl-how-num cgl-mono">{s.n}</span>
-            <h3>{s.title}</h3>
-            <p>{s.copy}</p>
-          </div>
-        ))}
       </div>
     </RevealSection>
   );
@@ -1226,30 +1103,6 @@ function Compare() {
   );
 }
 
-function Security() {
-  return (
-    <RevealSection className="cgl-security">
-      <div className="cgl-section-head">
-        <p className="cgl-eyebrow">Security &amp; accountability</p>
-        <h2>Built for Trust.</h2>
-      </div>
-      <div className="cgl-security-grid">
-        {SECURITY_POINTS.map((s) => {
-          const Icon = s.icon;
-          return (
-            <div className="cgl-security-item" key={s.title}>
-              <span className="cgl-security-icon"><Icon size={17} /></span>
-              <div>
-                <h4>{s.title}</h4>
-                <p>{s.copy}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </RevealSection>
-  );
-}
 
 function BusinessModel() {
   return (
@@ -1299,12 +1152,12 @@ function FinalCTA({ onNavigate }) {
         simple as using your phone — starting in Nigeria, with room to grow across Africa.
       </p>
       <div className="cgl-final-cta">
-        <a className="cgl-btn cgl-btn-primary cgl-btn-lg" href="#how-it-works">
-          See How It Works <ChevronRight size={16} />
-        </a>
-        <button className="cgl-btn cgl-btn-outline cgl-btn-lg" onClick={() => onNavigate("/app")}>
-          Join the Pilot
+        <button className="cgl-btn cgl-btn-primary cgl-btn-lg" onClick={() => onNavigate("/app")}>
+          Get Started <ChevronRight size={16} />
         </button>
+        <a className="cgl-btn cgl-btn-outline cgl-btn-lg" href="#solution">
+          Explore CoopGuard
+        </a>
       </div>
     </RevealSection>
   );
@@ -1314,17 +1167,46 @@ function Footer() {
   return (
     <footer className="cgl-footer">
       <div className="cgl-footer-inner">
-        <div className="cgl-footer-brand">
-          <img src="/brand/coopguard-mark.png" alt="CoopGuard" className="cgl-footer-mark" />
-          <span className="cgl-brand-name">Coop Guard</span>
+        <div className="cgl-footer-top">
+          <div className="cgl-footer-brand-col">
+            <div className="cgl-footer-brand">
+              <img src="/brand/coopguard-mark.png" alt="CoopGuard" className="cgl-footer-mark" />
+              <span className="cgl-brand-name">Coop Guard</span>
+            </div>
+            <p className="cgl-footer-copy">
+              Digital cooperative management with intelligent, human-controlled automation.
+            </p>
+            <div className="cgl-footer-social">
+              {FOOTER_SOCIAL.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <a key={s.label} href={s.href} aria-label={s.label} className="cgl-footer-social-link">
+                    <Icon size={16} strokeWidth={2} />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
+          {FOOTER_COLUMNS.map((col) => (
+            <div className="cgl-footer-col" key={col.heading}>
+              <span className="cgl-footer-col-heading">{col.heading}</span>
+              <ul>
+                {col.links.map((l) => (
+                  <li key={l.label}><a href={l.href}>{l.label}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <p className="cgl-footer-copy">
-          Digital cooperative management with intelligent, human-controlled automation.
-        </p>
-        <p className="cgl-footer-fine">
-          Simulation prototype. Figures and AI alerts shown across this site are demonstration
-          data. © {new Date().getFullYear()} Coop Guard.
-        </p>
+
+        <div className="cgl-footer-bottom">
+          <p className="cgl-footer-fine cgl-footer-fine--muted">
+            Simulation prototype. Figures and AI alerts shown across this site are demonstration data.
+          </p>
+          <p className="cgl-footer-fine">© {new Date().getFullYear()} Coop Guard. All rights reserved.</p>
+          <p className="cgl-footer-fine">Built for modern cooperative societies.</p>
+        </div>
       </div>
     </footer>
   );
@@ -1346,23 +1228,16 @@ export default function Landing({ onNavigate }) {
     <div className="cgl-root">
       <Nav onNavigate={navigate} />
       <Hero onNavigate={navigate} />
-      <ValueProps />
       <Problem />
-      <Gaps />
       <Solution />
-      <Features />
-      <Opportunity onNavigate={navigate} />
+      <Differentiators />
+      <HowItWorks />
       <AIAgent />
       <CreditScoreSection />
-      <ExceptionDashboard />
-      <HumanControlled />
+      <Opportunity onNavigate={navigate} />
       <VoiceInteraction />
-      <MemberExperience />
-      <AssistedIndependence />
-      <TransparencyReceipt />
-      <HowItWorks />
       <Compare />
-      <Security />
+      <HumanControlled />
       <BusinessModel />
       <TeamSection />
       <FinalCTA onNavigate={navigate} />
@@ -1734,11 +1609,23 @@ function LandingStyles() {
       .cgl-final-cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
       /* Footer */
-      .cgl-footer { border-top: 1px solid var(--cgl-line); padding: 40px 24px; }
+      .cgl-footer { border-top: 1px solid var(--cgl-line); padding: 56px 24px 28px; }
       .cgl-footer-inner { max-width: 1180px; margin: 0 auto; }
+      .cgl-footer-top { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 36px; padding-bottom: 36px; border-bottom: 1px solid var(--cgl-line); }
+      @media (max-width: 860px) { .cgl-footer-top { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 560px) { .cgl-footer-top { grid-template-columns: 1fr; } }
       .cgl-footer-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-      .cgl-footer-copy { font-size: 13px; color: #4B5D6E; margin: 0 0 6px; }
+      .cgl-footer-copy { font-size: 13px; color: #4B5D6E; margin: 0 0 16px; max-width: 260px; line-height: 1.6; }
+      .cgl-footer-social { display: flex; gap: 10px; }
+      .cgl-footer-social-link { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--cgl-line); display: flex; align-items: center; justify-content: center; color: var(--cgl-navy); transition: background 0.15s ease, color 0.15s ease; }
+      .cgl-footer-social-link:hover { background: var(--cgl-navy); color: #fff; }
+      .cgl-footer-col-heading { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cgl-navy); margin-bottom: 14px; }
+      .cgl-footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+      .cgl-footer-col a { font-size: 13px; color: #4B5D6E; text-decoration: none; }
+      .cgl-footer-col a:hover { color: var(--cgl-navy); }
+      .cgl-footer-bottom { padding-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; justify-content: space-between; }
       .cgl-footer-fine { font-size: 11.5px; color: #94A3B0; margin: 0; }
+      .cgl-footer-fine--muted { width: 100%; }
 
       @media (prefers-reduced-motion: reduce) {
         .cgl-root * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
