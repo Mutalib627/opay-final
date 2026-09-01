@@ -29,6 +29,7 @@ import {
   Target,
   TrendingUp,
   Award,
+  Quote,
   Twitter,
   Instagram,
   Linkedin,
@@ -261,6 +262,27 @@ const ABOUT_STATS = [
   { icon: Users, value: 5, suffix: "", label: "Founding team members" },
   { icon: Target, value: 1, suffix: "", label: "Shared product vision" },
   { icon: Award, value: 100, suffix: "%", label: "Human-controlled decisions" },
+];
+
+// Placeholder testimonials — role-based, not attributed to specific named
+// individuals. Swap these for real pilot / user feedback before this page
+// goes in front of investors.
+const TESTIMONIALS = [
+  {
+    quote: "Keeping track of contributions and loan repayments used to mean hours with a notebook every week. Having it all in one place, with alerts on what actually needs my attention, changes how much I can get done.",
+    name: "Cooperative Treasurer",
+    org: "Pilot cooperative society",
+  },
+  {
+    quote: "I like that I can just ask how much I've saved instead of waiting to ask someone at the next meeting. It makes me feel more in control of my own money.",
+    name: "Cooperative Member",
+    org: "Early pilot user",
+  },
+  {
+    quote: "What stood out was that the AI recommends but never decides on its own — every sensitive action still goes through a person. That balance is what makes it usable for a real cooperative.",
+    name: "Cooperative Administrator",
+    org: "Early pilot user",
+  },
 ];
 
 // Real team information — photos live in /public/team, referenced by path.
@@ -999,10 +1021,11 @@ function TeamSection() {
   const count = TEAM_MEMBERS.length;
   const { index, setIndex, next, prev, setPaused } = useAutoRotate(count, 6000);
   const [statsRef, statsVisible] = useReveal();
+  const member = TEAM_MEMBERS[index];
 
   return (
     <RevealSection id="team" className="cgl-team">
-      <div className="cgl-section-head">
+      <div className="cgl-section-head cgl-section-head--wide">
         <p className="cgl-eyebrow">About us</p>
         <h2>The people building Coop Guard</h2>
         <p className="cgl-section-copy">{ABOUT_MISSION}</p>
@@ -1026,29 +1049,28 @@ function TeamSection() {
           onMouseLeave={() => setPaused(false)}
         >
           <button className="cgl-team-nav" onClick={prev} aria-label="Previous team member" type="button">
-            <ChevronLeft size={18} />
+            <ChevronLeft size={20} />
           </button>
 
           <div className="cgl-team-card" key={index}>
-            <div className="cgl-team-photo-ring">
-              <div className="cgl-team-photo">
-                {TEAM_MEMBERS[index].photoUrl ? (
-                  <img src={TEAM_MEMBERS[index].photoUrl} alt={TEAM_MEMBERS[index].name} />
-                ) : (
-                  <Users size={28} strokeWidth={1.8} />
-                )}
-              </div>
+            <div className="cgl-team-photo">
+              {member.photoUrl ? (
+                <img src={member.photoUrl} alt={member.name} />
+              ) : (
+                <span className="cgl-team-photo-fallback">
+                  <Users size={48} strokeWidth={1.6} />
+                </span>
+              )}
             </div>
-            <h3>{TEAM_MEMBERS[index].name}</h3>
-            <p className="cgl-team-role">{TEAM_MEMBERS[index].role}</p>
-            {TEAM_MEMBERS[index].bio && <p className="cgl-team-bio">{TEAM_MEMBERS[index].bio}</p>}
-            <div className="cgl-team-progress-track">
-              <div className="cgl-team-progress-fill" />
+            <div className="cgl-team-info">
+              <h3>{member.name}</h3>
+              <p className="cgl-team-role">{member.role}</p>
+              {member.bio && <p className="cgl-team-bio">{member.bio}</p>}
             </div>
           </div>
 
           <button className="cgl-team-nav" onClick={next} aria-label="Next team member" type="button">
-            <ChevronRight size={18} />
+            <ChevronRight size={20} />
           </button>
 
           <div className="cgl-team-dots">
@@ -1064,6 +1086,29 @@ function TeamSection() {
           </div>
         </div>
       )}
+    </RevealSection>
+  );
+}
+
+function Testimonials() {
+  return (
+    <RevealSection id="testimonials" className="cgl-testimonials">
+      <div className="cgl-section-head">
+        <p className="cgl-eyebrow">Early feedback</p>
+        <h2>What people are saying.</h2>
+      </div>
+      <div className="cgl-testimonial-grid">
+        {TESTIMONIALS.map((t) => (
+          <div className="cgl-testimonial-card" key={t.name + t.org}>
+            <Quote size={22} strokeWidth={1.8} className="cgl-testimonial-icon" />
+            <p className="cgl-testimonial-quote">"{t.quote}"</p>
+            <div className="cgl-testimonial-attribution">
+              <span className="cgl-testimonial-name">{t.name}</span>
+              <span className="cgl-testimonial-org">{t.org}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </RevealSection>
   );
 }
@@ -1240,6 +1285,7 @@ export default function Landing({ onNavigate }) {
       <HumanControlled />
       <BusinessModel />
       <TeamSection />
+      <Testimonials />
       <FinalCTA onNavigate={navigate} />
       <Footer />
       <LandingStyles />
@@ -1555,28 +1601,46 @@ function LandingStyles() {
       .cgl-about-stat-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--cgl-paper-2); color: var(--cgl-teal-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
       .cgl-about-stat-value { font-size: 22px; font-weight: 700; color: var(--cgl-navy); }
       .cgl-about-stat-label { font-size: 12px; color: #64748B; }
-      .cgl-team-photo-ring { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px; padding: 4px; background: conic-gradient(var(--cgl-teal), var(--cgl-teal-deep), var(--cgl-navy), var(--cgl-teal)); }
-      .cgl-team-photo-ring .cgl-team-photo { width: 100%; height: 100%; margin: 0; }
-      .cgl-team-progress-track { margin-top: 16px; height: 3px; border-radius: 999px; background: var(--cgl-paper-2); overflow: hidden; }
-      .cgl-team-progress-fill { height: 100%; width: 0%; background: var(--cgl-teal-deep); border-radius: 999px; animation: cgl-team-progress 6s linear forwards; }
-      @keyframes cgl-team-progress { from { width: 0%; } to { width: 100%; } }
-
       /* Team */
+      .cgl-root section.cgl-team { max-width: 1320px; }
+      .cgl-section-head--wide { max-width: 760px; }
       .cgl-team-pending { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 20px; color: #94A3B0; text-align: center; }
       .cgl-team-pending p { margin: 0; font-size: 13.5px; }
-      .cgl-team-carousel { position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; max-width: 480px; margin: 0 auto; }
-      .cgl-team-nav { background: #fff; border: 1px solid var(--cgl-line); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cgl-navy); flex-shrink: 0; transition: background 0.15s ease; }
-      .cgl-team-nav:hover { background: var(--cgl-paper-2); }
-      .cgl-team-card { background: #fff; border: 1px solid var(--cgl-line); border-radius: 18px; padding: 28px; text-align: center; flex: 1; animation: cgl-team-fade 0.5s ease; }
-      @keyframes cgl-team-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-      .cgl-team-photo { width: 84px; height: 84px; border-radius: 50%; background: var(--cgl-paper-2); color: var(--cgl-navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; overflow: hidden; }
-      .cgl-team-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-      .cgl-team-card h3 { font-size: 17px; margin: 0 0 4px; }
-      .cgl-team-role { font-size: 12.5px; font-weight: 600; color: var(--cgl-teal-deep); margin: 0 0 10px; }
-      .cgl-team-bio { font-size: 12.5px; line-height: 1.6; color: #64748B; margin: 0; }
-      .cgl-team-dots { position: absolute; bottom: -28px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
-      .cgl-team-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cgl-line); border: none; cursor: pointer; padding: 0; }
-      .cgl-team-dot.is-active { background: var(--cgl-navy); }
+      .cgl-team-carousel { position: relative; display: flex; align-items: center; justify-content: center; gap: 20px; max-width: 1100px; margin: 0 auto; padding-bottom: 36px; }
+      .cgl-team-nav { background: #fff; border: 1px solid var(--cgl-line); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cgl-navy); flex-shrink: 0; transition: background 0.15s ease, border-color 0.15s ease; }
+      .cgl-team-nav:hover { background: var(--cgl-paper-2); border-color: var(--cgl-teal); }
+      .cgl-team-card { background: #fff; border: 1px solid var(--cgl-line); border-radius: 24px; overflow: hidden; display: flex; align-items: stretch; flex: 1; min-height: 420px; box-shadow: 0 24px 48px -30px rgba(15, 30, 45, 0.18); animation: cgl-team-fade 0.5s ease; }
+      @keyframes cgl-team-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      .cgl-team-photo { width: 40%; flex-shrink: 0; background: var(--cgl-paper-2); overflow: hidden; }
+      .cgl-team-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+      .cgl-team-photo-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--cgl-navy); color: #fff; }
+      .cgl-team-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 48px 52px; }
+      .cgl-team-info h3 { font-size: 27px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; color: var(--cgl-navy); }
+      .cgl-team-role { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cgl-teal-deep); margin: 0 0 18px; }
+      .cgl-team-bio { font-size: 15px; line-height: 1.75; color: #4B5D6E; margin: 0; max-width: 520px; }
+      .cgl-team-dots { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 7px; }
+      .cgl-team-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cgl-line); border: none; cursor: pointer; padding: 0; transition: background 0.15s ease, transform 0.15s ease; }
+      .cgl-team-dot.is-active { background: var(--cgl-navy); transform: scale(1.3); }
+      @media (max-width: 860px) {
+        .cgl-team-carousel { gap: 10px; }
+        .cgl-team-card { flex-direction: column; min-height: 0; }
+        .cgl-team-photo { width: 100%; aspect-ratio: 16 / 10; }
+        .cgl-team-info { padding: 32px 28px; }
+        .cgl-team-info h3 { font-size: 22px; }
+      }
+      @media (max-width: 560px) {
+        .cgl-team-nav { width: 36px; height: 36px; }
+      }
+
+      /* Testimonials */
+      .cgl-testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+      @media (max-width: 900px) { .cgl-testimonial-grid { grid-template-columns: 1fr; } }
+      .cgl-testimonial-card { background: #fff; border: 1px solid var(--cgl-line); border-radius: 18px; padding: 28px 26px; display: flex; flex-direction: column; }
+      .cgl-testimonial-icon { color: var(--cgl-teal-deep); margin-bottom: 14px; }
+      .cgl-testimonial-quote { font-size: 14.5px; line-height: 1.75; color: #33424F; margin: 0 0 20px; flex: 1; }
+      .cgl-testimonial-attribution { display: flex; flex-direction: column; gap: 2px; padding-top: 14px; border-top: 1px solid var(--cgl-line); }
+      .cgl-testimonial-name { font-size: 13.5px; font-weight: 700; color: var(--cgl-navy); }
+      .cgl-testimonial-org { font-size: 12px; color: #64748B; }
 
       /* Compare */
       .cgl-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
