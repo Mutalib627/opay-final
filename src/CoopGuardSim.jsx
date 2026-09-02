@@ -3,9 +3,10 @@ import {
   Wallet, FileText, BarChart3, ShieldCheck, AlertTriangle, Vote, Bell,
   ArrowDownCircle, ArrowUpCircle, CheckCircle2, XCircle, Clock, Users,
   TrendingUp, TrendingDown, Hash, Lock, ChevronRight, X, Plus, LogOut, ShieldAlert,
-  ScanFace, Fingerprint, Video, MessageSquare, Send, Search, Gauge,
-  CreditCard, Brain, ShieldQuestion, Mic, MicOff, VideoOff, PhoneOff,
-  Award, Medal, ArrowRightLeft, AlertOctagon, Building2, History
+  ScanFace, Fingerprint, Video, VideoOff, MessageSquare, Send, Search, Gauge,
+  CreditCard, Brain, ShieldQuestion, Mic, MicOff, PhoneOff,
+  Award, Medal, ArrowRightLeft, AlertOctagon, Building2, History,
+  Eye, EyeOff, RefreshCw, ArrowLeft, Info,
 } from "lucide-react";
 
 /* ============================================================
@@ -659,19 +660,31 @@ export default function CoopGuardSim() {
 function SignInPage({ members, onSignIn }) {
   const [memberNo, setMemberNo] = useState("");
   const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
-  const [stage, setStage] = useState("credentials"); // credentials -> biometric -> done
+  const [notice, setNotice] = useState(null); // { title, body } for forgot-password / create-account
+  const [stage, setStage] = useState("credentials"); // credentials -> face | fingerprint
   const [pendingUserId, setPendingUser] = useState(null);
   const pendingUser = members.find((m) => m.id === pendingUserId);
 
+  const resolveMember = () => members.find((mm) => mm.memberNo.toLowerCase() === memberNo.trim().toLowerCase());
+
   const handleCredentials = (e) => {
     e.preventDefault();
-    const m = members.find((mm) => mm.memberNo.toLowerCase() === memberNo.trim().toLowerCase());
+    const m = resolveMember();
     if (!m) { setError("Member number not recognized. Try CG-0001 to CG-0005."); return; }
     if (pin.length < 4) { setError("Enter your 4-digit PIN (any digits work in this simulation)."); return; }
     setError("");
+    onSignIn(m.id);
+  };
+
+  const startBiometric = (method) => {
+    const m = resolveMember();
+    if (!m) { setError("Enter your member number first, then choose a biometric option."); return; }
+    setError("");
     setPendingUser(m.id);
-    setStage("biometric");
+    setStage(method); // "face" | "fingerprint"
   };
 
   return (
@@ -686,45 +699,355 @@ function SignInPage({ members, onSignIn }) {
         </div>
 
         {stage === "credentials" && (
-          <form className="cg-form cg-signin-form" onSubmit={handleCredentials}>
-            <h2>Sign in to your cooperative account</h2>
-            <label>Member number</label>
-            <input type="text" placeholder="e.g. CG-0001" value={memberNo} onChange={(e) => setMemberNo(e.target.value)} autoFocus />
-            <label>PIN</label>
-            <input type="password" placeholder="••••" maxLength={4} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
-            {error && <div className="cg-signin-error">{error}</div>}
-            <button type="submit" className="cg-btn cg-btn-primary cg-btn-block">Continue</button>
-            <div className="cg-signin-demo">
-              <div className="cg-signin-demo-title">Demo accounts (any 4-digit PIN)</div>
-              <div className="cg-signin-demo-grid">
-                {members.map((m) => (
-                  <button type="button" key={m.id} className="cg-signin-demo-chip" onClick={() => { setMemberNo(m.memberNo); setPin("1234"); }}>
-                    {m.memberNo} · {m.name.split(" ")[0]} <span className="cg-signin-demo-role">{m.role.replace("_", " ")}</span>
-                  </button>
-                ))}
-              </div>
+          <>
+            <div className="cg-signin-welcome">
+              <h2>Welcome back</h2>
+              <p>Sign in with your member number and PIN, or verify with a biometric option below.</p>
             </div>
-          </form>
+
+            <div className="cg-signin-security-note">
+              <ShieldCheck size={15} />
+              <span>Your account is protected by a PIN and optional biometric verification. Sensitive actions always ask for your confirmation first.</span>
+            </div>
+
+            <form className="cg-form cg-signin-form" onSubmit={handleCredentials}>
+              <label>Member number</label>
+              <input type="text" placeholder="e.g. CG-0001" value={memberNo} onChange={(e) => setMemberNo(e.target.value)} autoFocus />
+
+              <label>PIN</label>
+              <div className="cg-signin-pin-field">
+                <input
+                  type={showPin ? "text" : "password"}
+                  placeholder="••••"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                />
+                <button type="button" className="cg-signin-pin-toggle" onClick={() => setShowPin((v) => !v)} aria-label={showPin ? "Hide PIN" : "Show PIN"}>
+                  {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+
+              <div className="cg-signin-row">
+                <label className="cg-check cg-signin-remember">
+                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} /> Remember me
+                </label>
+                <button
+                  type="button"
+                  className="cg-signin-link"
+                  onClick={() => setNotice({
+                    title: "Forgot your PIN?",
+                    body: "Password/PIN reset isn't wired up in this simulation. In production this would send a secure reset link to your registered phone or email — for now, contact your cooperative administrator.",
+                  })}
+                >
+                  Forgot PIN?
+                </button>
+              </div>
+
+              {error && <div className="cg-signin-error">{error}</div>}
+
+              <button type="submit" className="cg-btn cg-btn-primary cg-btn-block">Sign In</button>
+
+              <div className="cg-signin-divider"><span>or verify with biometrics</span></div>
+
+              <div className="cg-signin-bio-options">
+                <button type="button" className="cg-btn cg-btn-secondary cg-signin-bio-btn" onClick={() => startBiometric("face")}>
+                  <ScanFace size={16} /> Face Verification
+                </button>
+                <button type="button" className="cg-btn cg-btn-secondary cg-signin-bio-btn" onClick={() => startBiometric("fingerprint")}>
+                  <Fingerprint size={16} /> Fingerprint
+                </button>
+              </div>
+
+              <div className="cg-signin-create">
+                New to your cooperative?{" "}
+                <button
+                  type="button"
+                  className="cg-signin-link"
+                  onClick={() => setNotice({
+                    title: "Create an account",
+                    body: "Self-service registration isn't enabled in this simulation. In production, new members would be onboarded by their cooperative administrator or through a verified sign-up flow. Explore CoopGuard with one of the demo accounts below.",
+                  })}
+                >
+                  Create an account
+                </button>
+              </div>
+
+              {notice && (
+                <div className="cg-signin-notice">
+                  <Info size={15} />
+                  <div>
+                    <strong>{notice.title}</strong>
+                    <p>{notice.body}</p>
+                  </div>
+                  <button type="button" className="cg-icon-btn" onClick={() => setNotice(null)} aria-label="Dismiss"><X size={14} /></button>
+                </div>
+              )}
+
+              <div className="cg-signin-demo">
+                <div className="cg-signin-demo-title">Demo accounts (any 4-digit PIN)</div>
+                <div className="cg-signin-demo-grid">
+                  {members.map((m) => (
+                    <button type="button" key={m.id} className="cg-signin-demo-chip" onClick={() => { setMemberNo(m.memberNo); setPin("1234"); setError(""); }}>
+                      {m.memberNo} · {m.name.split(" ")[0]} <span className="cg-signin-demo-role">{m.role.replace("_", " ")}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </form>
+          </>
         )}
 
-        {stage === "biometric" && pendingUser && (
-          <BiometricStep
+        {stage === "face" && pendingUser && (
+          <FaceVerification
             user={pendingUser}
-            purpose="sign-in"
-            onComplete={() => onSignIn(pendingUser.id)}
+            onSuccess={() => onSignIn(pendingUser.id)}
+            onSwitchMethod={() => setStage("fingerprint")}
+            onBack={() => setStage("credentials")}
+          />
+        )}
+
+        {stage === "fingerprint" && pendingUser && (
+          <FingerprintVerification
+            user={pendingUser}
+            onSuccess={() => onSignIn(pendingUser.id)}
+            onSwitchMethod={() => setStage("face")}
             onBack={() => setStage("credentials")}
           />
         )}
       </div>
       <div className="cg-signin-footer">
-        Simulation only — no real biometric data, BVN, or funds are processed.
+        Simulation only — no real biometric data, BVN, or funds are processed. Biometric verification is currently simulated for this prototype.
       </div>
     </div>
   );
 }
 
 // ============================================================
-// BIOMETRIC VERIFICATION STEP (face + fingerprint simulation)
+// FACE VERIFICATION (login) — real camera preview, simulated liveness sequence
+// ============================================================
+const FACE_CHALLENGES = [
+  { key: "blink", label: "Blink your eyes" },
+  { key: "left", label: "Turn your head slightly left" },
+  { key: "right", label: "Turn your head slightly right" },
+  { key: "forward", label: "Look directly at the camera" },
+];
+
+function FaceVerification({ user, onSuccess, onSwitchMethod, onBack }) {
+  // phase: permission -> requesting -> denied -> positioning -> scanning -> success
+  const [phase, setPhase] = useState("permission");
+  const [stepIndex, setStepIndex] = useState(-1); // -1 = "face position" step, 0..N = challenges
+  const [errorMsg, setErrorMsg] = useState("");
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const timers = useRef([]);
+
+  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => { stopCamera(); clearTimers(); }, [stopCamera]);
+
+  const requestCamera = async () => {
+    setPhase("requesting");
+    setErrorMsg("");
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setErrorMsg("This browser doesn't support camera access. Try Fingerprint or your PIN instead.");
+      setPhase("denied");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setPhase("positioning");
+    } catch (err) {
+      setErrorMsg(
+        err && err.name === "NotAllowedError"
+          ? "Camera access was denied. Allow camera permission to use Face Verification, or choose another sign-in method."
+          : "We couldn't reach a camera on this device. Choose another sign-in method."
+      );
+      setPhase("denied");
+    }
+  };
+
+  const beginScanning = () => {
+    setPhase("scanning");
+    setStepIndex(0);
+    const step = (i) => {
+      if (i >= FACE_CHALLENGES.length) {
+        stopCamera();
+        setPhase("success");
+        return;
+      }
+      setStepIndex(i);
+      const t = setTimeout(() => step(i + 1), 1500);
+      timers.current.push(t);
+    };
+    const t0 = setTimeout(() => step(0), 900); // brief "face position" beat first
+    timers.current.push(t0);
+  };
+
+  const cancel = () => { stopCamera(); clearTimers(); onBack(); };
+
+  return (
+    <div className="cg-bio">
+      <div className="cg-bio-head">
+        <button type="button" className="cg-icon-btn" onClick={cancel} aria-label="Back to password"><ArrowLeft size={16} /></button>
+        <div>
+          <h2>Face Verification</h2>
+          <p className="cg-bio-sub">Confirming it's you before opening {user.name.split(" ")[0]}'s dashboard.</p>
+        </div>
+      </div>
+
+      {phase === "permission" && (
+        <div className="cg-face-permission">
+          <Video size={30} />
+          <p>CoopGuard needs access to your camera to run Face Verification. Nothing is recorded or stored — this is a simulated prototype flow.</p>
+          <button className="cg-btn cg-btn-primary" onClick={requestCamera}><Video size={16} /> Enable camera</button>
+        </div>
+      )}
+
+      {phase === "requesting" && (
+        <div className="cg-face-permission">
+          <div className="cg-face-spinner" />
+          <p>Waiting for camera permission…</p>
+        </div>
+      )}
+
+      {phase === "denied" && (
+        <div className="cg-face-permission cg-face-permission-error">
+          <VideoOff size={30} />
+          <p>{errorMsg}</p>
+          <div className="cg-btn-row">
+            <button className="cg-btn cg-btn-secondary" onClick={requestCamera}><RefreshCw size={15} /> Try again</button>
+            <button className="cg-btn cg-btn-secondary" onClick={onSwitchMethod}><Fingerprint size={15} /> Use fingerprint instead</button>
+          </div>
+        </div>
+      )}
+
+      {(phase === "positioning" || phase === "scanning" || phase === "success") && (
+        <>
+          <div className={`cg-face-camera ${phase === "success" ? "is-success" : ""}`}>
+            <video ref={videoRef} autoPlay playsInline muted />
+            <div className="cg-face-frame" />
+            {phase === "scanning" && <div className="cg-face-scanline" />}
+            {phase === "success" && (
+              <div className="cg-face-success-overlay"><CheckCircle2 size={40} /></div>
+            )}
+          </div>
+
+          {phase === "positioning" && (
+            <div className="cg-face-instruction">
+              <p>Center your face inside the frame, then start verification.</p>
+              <button className="cg-btn cg-btn-primary" onClick={beginScanning}><ScanFace size={16} /> Start verification</button>
+            </div>
+          )}
+
+          {phase === "scanning" && (
+            <div className="cg-face-steps">
+              {["Face position", ...FACE_CHALLENGES.map((c) => c.label)].map((label, i) => {
+                const stateIdx = i - 1; // -1 = "Face position" beat
+                const done = stateIdx < stepIndex || (stateIdx === -1);
+                const active = stateIdx === stepIndex;
+                return (
+                  <div key={label} className={`cg-face-step ${done ? "is-done" : ""} ${active ? "is-active" : ""}`}>
+                    <span className="cg-face-step-dot">{done ? <CheckCircle2 size={13} /> : i + 1}</span>
+                    <span>{label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {phase === "success" && (
+            <div className="cg-face-instruction">
+              <p className="cg-bio-pass"><CheckCircle2 size={16} /> Simulated verification complete for {user.name}.</p>
+              <button className="cg-btn cg-btn-primary" onClick={onSuccess}>Continue</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {(phase === "permission" || phase === "positioning" || phase === "scanning") && (
+        <div className="cg-btn-row cg-face-footer">
+          <button type="button" className="cg-signin-link" onClick={onSwitchMethod}>Use fingerprint instead</button>
+          <button type="button" className="cg-signin-link" onClick={cancel}>Cancel</button>
+        </div>
+      )}
+
+      <p className="cg-bio-disclaimer">Biometric verification is currently simulated for this prototype — no facial data is analyzed, matched, or stored.</p>
+    </div>
+  );
+}
+
+// ============================================================
+// FINGERPRINT VERIFICATION (login) — clearly simulated sensor UI
+// ============================================================
+function FingerprintVerification({ user, onSuccess, onSwitchMethod, onBack }) {
+  const [phase, setPhase] = useState("idle"); // idle -> scanning -> success
+  const timer = useRef(null);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const scan = () => {
+    setPhase("scanning");
+    timer.current = setTimeout(() => setPhase("success"), 1700);
+  };
+
+  return (
+    <div className="cg-bio">
+      <div className="cg-bio-head">
+        <button type="button" className="cg-icon-btn" onClick={onBack} aria-label="Back to password"><ArrowLeft size={16} /></button>
+        <div>
+          <h2>Fingerprint Verification</h2>
+          <p className="cg-bio-sub">Confirming it's you before opening {user.name.split(" ")[0]}'s dashboard.</p>
+        </div>
+      </div>
+
+      <div className="cg-fingerprint-stage">
+        <button
+          type="button"
+          className={`cg-fingerprint-sensor ${phase}`}
+          onClick={phase === "idle" ? scan : undefined}
+          disabled={phase !== "idle"}
+          aria-label="Place your finger on the sensor"
+        >
+          <Fingerprint size={44} />
+          {phase === "scanning" && <span className="cg-fingerprint-ring" />}
+          {phase === "success" && <span className="cg-fingerprint-check"><CheckCircle2 size={20} /></span>}
+        </button>
+
+        <p className="cg-fingerprint-status">
+          {phase === "idle" && "Tap the sensor to simulate placing your finger."}
+          {phase === "scanning" && "Reading fingerprint…"}
+          {phase === "success" && <span className="cg-bio-pass"><CheckCircle2 size={16} /> Fingerprint verified for {user.name}.</span>}
+        </p>
+      </div>
+
+      {phase === "success" ? (
+        <button className="cg-btn cg-btn-primary cg-btn-block" onClick={onSuccess}>Continue</button>
+      ) : (
+        <div className="cg-btn-row cg-face-footer">
+          <button type="button" className="cg-signin-link" onClick={onSwitchMethod}>Use face verification instead</button>
+          <button type="button" className="cg-signin-link" onClick={onBack}>Cancel</button>
+        </div>
+      )}
+
+      <p className="cg-bio-disclaimer">This is a visual simulation — CoopGuard does not access your device's real fingerprint sensor. Biometric verification is currently simulated for this prototype.</p>
+    </div>
+  );
+}
+
+// ============================================================
+// BIOMETRIC VERIFICATION STEP (face + fingerprint simulation) — used by loan
+// application identity verification. Left as-is; the login page above uses
+// its own dedicated FaceVerification / FingerprintVerification flows.
 // ============================================================
 function BiometricStep({ user, purpose, onComplete, onBack }) {
   const [phase, setPhase] = useState("idle"); // idle -> scanning_face -> scanning_finger -> result
@@ -2579,22 +2902,43 @@ function Style() {
 
       /* Sign-in page */
       .cg-signin { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 30% 20%, rgba(86,145,146,0.12), transparent 50%), var(--cg-navy); }
-      .cg-signin-card { background: var(--cg-paper); border-radius: 16px; padding: 32px; max-width: 460px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
-      .cg-signin-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+      .cg-signin-card { background: var(--cg-paper); border-radius: 18px; padding: 36px; max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+      .cg-signin-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
       .cg-brand-mark-lg { width: 46px; height: 46px; border-radius: 10px; }
       .cg-brand-name-lg { font-size: 22px; }
+      .cg-signin-welcome h2 { font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 21px; margin: 0 0 6px; letter-spacing: -0.01em; }
+      .cg-signin-welcome p { font-size: 13.5px; color: #4B5563; line-height: 1.6; margin: 0 0 16px; }
+      .cg-signin-security-note { display: flex; align-items: flex-start; gap: 8px; background: var(--cg-paper-2); border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.55; color: #4B5563; margin-bottom: 18px; }
+      .cg-signin-security-note svg { flex-shrink: 0; margin-top: 1px; color: var(--cg-teal); }
       .cg-signin-form h2 { font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 18px; margin: 0 0 8px; }
       .cg-btn-block { width: 100%; justify-content: center; margin-top: 8px; }
-      .cg-signin-error { background: #fbe9e7; color: var(--cg-red); font-size: 12.5px; padding: 8px 10px; border-radius: 8px; }
+      .cg-signin-pin-field { position: relative; display: flex; align-items: center; }
+      .cg-signin-pin-field input { width: 100%; padding-right: 40px; }
+      .cg-signin-pin-toggle { position: absolute; right: 10px; background: none; border: none; padding: 4px; cursor: pointer; color: #6B7785; display: flex; align-items: center; }
+      .cg-signin-pin-toggle:hover { color: var(--cg-ink); }
+      .cg-signin-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+      .cg-signin-remember { font-size: 12.5px; color: #4B5563; }
+      .cg-signin-link { background: none; border: none; padding: 0; font: inherit; font-size: 12.5px; color: var(--cg-blue); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+      .cg-signin-error { background: #fbe9e7; color: var(--cg-red); font-size: 12.5px; padding: 8px 10px; border-radius: 8px; margin-top: 10px; }
+      .cg-signin-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; font-size: 11.5px; color: #8A97A3; text-transform: uppercase; letter-spacing: 0.04em; }
+      .cg-signin-divider::before, .cg-signin-divider::after { content: ""; flex: 1; height: 1px; background: var(--cg-line); }
+      .cg-signin-bio-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .cg-signin-bio-btn { justify-content: center; }
+      .cg-signin-create { text-align: center; font-size: 12.5px; color: #4B5563; margin-top: 16px; }
+      .cg-signin-notice { display: flex; align-items: flex-start; gap: 8px; background: #EAF2F8; border: 1px solid #CBDCEA; border-radius: 10px; padding: 12px; margin-top: 14px; font-size: 12.5px; }
+      .cg-signin-notice svg { flex-shrink: 0; margin-top: 2px; color: var(--cg-blue); }
+      .cg-signin-notice strong { display: block; font-size: 13px; margin-bottom: 3px; }
+      .cg-signin-notice p { margin: 0; color: #4B5563; line-height: 1.5; }
+      .cg-signin-notice .cg-icon-btn { margin-left: auto; }
       .cg-signin-demo { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--cg-line); }
       .cg-signin-demo-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #6B7785; margin-bottom: 8px; }
       .cg-signin-demo-grid { display: flex; flex-direction: column; gap: 6px; }
       .cg-signin-demo-chip { text-align: left; background: var(--cg-paper-2); border: 1px solid var(--cg-line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; cursor: pointer; font-family: inherit; display: flex; justify-content: space-between; align-items: center; }
       .cg-signin-demo-chip:hover { background: #E3E8EB; }
       .cg-signin-demo-role { color: #6B7785; text-transform: capitalize; font-size: 11px; }
-      .cg-signin-footer { color: var(--cg-paper); opacity: 0.6; font-size: 12px; margin-top: 16px; text-align: center; max-width: 460px; }
+      .cg-signin-footer { color: var(--cg-paper); opacity: 0.6; font-size: 12px; margin-top: 16px; text-align: center; max-width: 480px; }
 
-      /* Biometric */
+      /* Biometric — shared (loan-application BiometricStep) */
       .cg-bio h2 { font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 18px; margin: 0 0 4px; }
       .cg-bio-sub { font-size: 13px; color: #4B5563; line-height: 1.6; margin: 0 0 14px; }
       .cg-bio-stage { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; background: var(--cg-paper-2); border-radius: 12px; margin-bottom: 14px; }
@@ -2613,6 +2957,45 @@ function Style() {
       .cg-bio-noenroll { background: var(--cg-paper-2); border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 13px; }
       .cg-bio-noenroll p { margin: 0 0 8px; color: #4B5563; }
       .cg-pill-scanning, .cg-pill-info { background: #e6eef7; color: var(--cg-blue); }
+
+      /* Biometric — login-specific (Face + Fingerprint verification) */
+      .cg-bio-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+      .cg-bio-head .cg-icon-btn { flex-shrink: 0; margin-top: 2px; }
+      .cg-bio-disclaimer { font-size: 11px; color: #8A97A3; line-height: 1.5; margin: 14px 0 0; text-align: center; }
+      .cg-face-footer { justify-content: center; gap: 20px; margin-top: 14px; }
+      .cg-face-permission { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 32px 16px; background: var(--cg-paper-2); border-radius: 14px; color: #4B5563; }
+      .cg-face-permission svg { color: var(--cg-teal); }
+      .cg-face-permission p { font-size: 13px; line-height: 1.6; margin: 0; max-width: 340px; }
+      .cg-face-permission-error svg { color: var(--cg-red); }
+      .cg-face-spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--cg-line); border-top-color: var(--cg-teal); animation: cg-spin 0.8s linear infinite; }
+      @keyframes cg-spin { to { transform: rotate(360deg); } }
+      .cg-face-camera { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; background: #0B1220; margin-bottom: 14px; }
+      .cg-face-camera video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+      .cg-face-frame { position: absolute; inset: 12%; border: 3px solid rgba(255,255,255,0.75); border-radius: 50% / 46%; box-shadow: 0 0 0 2000px rgba(11,18,32,0.35); pointer-events: none; }
+      .cg-face-camera.is-success .cg-face-frame { border-color: #4CD787; }
+      .cg-face-scanline { position: absolute; left: 12%; right: 12%; height: 3px; background: var(--cg-teal); box-shadow: 0 0 14px var(--cg-teal); animation: cg-face-scan 1.5s ease-in-out infinite; }
+      @keyframes cg-face-scan { 0% { top: 14%; } 50% { top: 82%; } 100% { top: 14%; } }
+      .cg-face-success-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(11,18,32,0.45); color: #4CD787; }
+      .cg-face-instruction { text-align: center; }
+      .cg-face-instruction p { font-size: 13.5px; color: #4B5563; margin: 0 0 12px; }
+      .cg-face-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+      .cg-face-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #8A97A3; padding: 8px 10px; border-radius: 8px; transition: 0.2s; }
+      .cg-face-step.is-active { background: var(--cg-paper-2); color: var(--cg-ink); font-weight: 600; }
+      .cg-face-step.is-done { color: #2f7d4f; }
+      .cg-face-step-dot { width: 20px; height: 20px; border-radius: 50%; background: #EEF2F4; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; color: inherit; }
+      .cg-face-step.is-done .cg-face-step-dot { background: #E3F5EA; }
+      .cg-face-step.is-active .cg-face-step-dot { background: var(--cg-teal); color: #fff; }
+
+      .cg-fingerprint-stage { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 32px 16px; background: var(--cg-paper-2); border-radius: 14px; margin-bottom: 14px; }
+      .cg-fingerprint-sensor { position: relative; width: 104px; height: 104px; border-radius: 50%; background: #fff; border: 3px solid var(--cg-line); display: flex; align-items: center; justify-content: center; color: #6B7785; cursor: pointer; transition: 0.2s; }
+      .cg-fingerprint-sensor:hover:not(:disabled) { border-color: var(--cg-teal); color: var(--cg-teal); }
+      .cg-fingerprint-sensor:disabled { cursor: default; }
+      .cg-fingerprint-sensor.scanning { border-color: var(--cg-teal); color: var(--cg-teal); }
+      .cg-fingerprint-sensor.success { border-color: #2f7d4f; color: #2f7d4f; }
+      .cg-fingerprint-ring { position: absolute; inset: -6px; border-radius: 50%; border: 3px solid var(--cg-teal); opacity: 0; animation: cg-fp-ring 1.5s ease-out infinite; }
+      @keyframes cg-fp-ring { 0% { opacity: 0.7; transform: scale(0.9); } 100% { opacity: 0; transform: scale(1.25); } }
+      .cg-fingerprint-check { position: absolute; bottom: -4px; right: -4px; background: #2f7d4f; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+      .cg-fingerprint-status { font-size: 13px; color: #4B5563; text-align: center; min-height: 20px; }
 
       /* Credit check */
       .cg-creditcheck-id { display: flex; align-items: center; gap: 12px; background: var(--cg-paper-2); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
