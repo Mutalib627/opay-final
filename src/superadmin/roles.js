@@ -65,7 +65,7 @@ export const ROLE_CATALOG = [
     label: "President / Chairperson",
     category: "cooperative",
     description: "Leads the cooperative's administration and governance; oversees the cooperative's officers and strategic decisions.",
-    permissions: [P["coop.manage_members"], P["coop.manage_governance"], P["coop.manage_finance"], P["coop.manage_loans"]],
+    permissions: [P["coop.manage_members"], P["coop.manage_governance"], P["coop.manage_finance"], P["coop.manage_loans"], P["coop.audit_oversight"]],
   },
   {
     id: "secretary",
