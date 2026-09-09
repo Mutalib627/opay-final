@@ -7,9 +7,19 @@ import {
   CreditCard, Brain, ShieldQuestion, Mic, MicOff, PhoneOff,
   Award, Medal, ArrowRightLeft, AlertOctagon, Building2, History,
   Eye, EyeOff, RefreshCw, ArrowLeft, Info, Menu, LayoutGrid,
+  Settings, UserCircle2,
 } from "lucide-react";
 import { loadFaceLandmarker, analyzeFace } from "./lib/faceLandmarker";
 import SuperAdminWorkspace from "./superadmin/SuperAdminWorkspace";
+import { getCategoryForRole, getRoleMeta } from "./superadmin/roles";
+import CooperativeOverview from "./cooperative/CooperativeOverview";
+import OperationsCenter from "./cooperative/OperationsCenter";
+import MembersSection from "./cooperative/MembersSection";
+import FinanceSection from "./cooperative/FinanceSection";
+import CreditIntelligenceOverview from "./cooperative/CreditIntelligencePanel";
+import MemberHome from "./member/MemberHome";
+import AskCoopGuard from "./member/AskCoopGuard";
+import MemberProfile from "./member/MemberProfile";
 
 /* ============================================================
    COOPGUARD — Transparent Digital Cooperative Management System
@@ -359,9 +369,16 @@ export default function CoopGuardSim() {
   const [disputes, setDisputes] = useState(SEED_DISPUTES); // member complaints / dispute records
 
   const currentUser = members.find((m) => m.id === currentUserId);
-  const isStaff = currentUser?.role === "admin" || currentUser?.role === "loan_officer";
-  const isAdmin = currentUser?.role === "admin";
   const isSuperAdmin = currentUser?.role === "super_admin";
+  // Category-based access (see src/superadmin/roles.js): any cooperative
+  // role — not just the legacy "admin"/"loan_officer" strings — gets
+  // cooperative-staff access; everything else defaults to the member
+  // experience, which is the safer default.
+  const isCoopStaff = !!currentUser && !isSuperAdmin && getCategoryForRole(currentUser.role) === "cooperative";
+  const isMemberCat = !!currentUser && !isSuperAdmin && !isCoopStaff;
+  const isStaff = isCoopStaff; // kept for components reused inside the cooperative shell (LoansPanel, VotingPanel)
+  const isAdmin = currentUser?.role === "admin";
+  const myPermissions = isCoopStaff ? getRoleMeta(currentUser.role).permissions : [];
 
   const showToast = useCallback((msg, kind = "info") => {
     setToast({ msg, kind, id: nextId() });
@@ -448,8 +465,8 @@ export default function CoopGuardSim() {
     setFraudFlags((prev) => [entry, ...prev]);
     pushAudit("FRAUD_FLAG_RAISED", "AI Fraud Engine", { txId: transaction.id, rules: flags.map((f) => f.rule) });
     bumpReputation(transaction.userId, "auditPerformance", -flags.length * 4, `Fraud flag raised: ${flags.map((f) => f.rule).join(", ")}`);
-    // notify admins
-    members.filter((m) => m.role === "admin").forEach((a) => {
+    // notify cooperative staff (any cooperative-category role, not just the legacy "admin")
+    members.filter((m) => getCategoryForRole(m.role) === "cooperative").forEach((a) => {
       pushNotification(a.id, "⚠ Suspicious activity flagged", `Transaction ${transaction.id} for ${members.find(m=>m.id===transaction.userId)?.name} flagged by ${flags.length} rule(s).`);
     });
   };
@@ -586,6 +603,37 @@ export default function CoopGuardSim() {
     showToast("Biometric enrollment complete", "success");
   };
 
+  // Basic member-record edits made from the Cooperative Administration
+  // "Members" section (name/phone/email). Account activation, deactivation,
+  // and archiving stay Super-Admin-only, per the stage-1 security boundary.
+  const updateMemberProfile = (memberId, patch) => {
+    const target = members.find((m) => m.id === memberId);
+    setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, ...patch } : m));
+    pushAudit("MEMBER_RECORD_UPDATED", currentUser.name, { member: target?.name, fields: Object.keys(patch) });
+    showToast(`${target?.name || "Member"}'s record updated`, "success");
+  };
+
+  // Unifies the Approve / Reject / Request Verification actions surfaced on
+  // every alert card (Overview, Operations, Risk & Security) with the
+  // underlying engines already in this file (reviewFraud / decideLoan),
+  // and logs a notification + audit event either way.
+  const handleAlertAction = (alert, action) => {
+    if (alert.kind === "fraud") {
+      const mapped = action === "approve" ? "dismissed" : action === "reject" ? "escalated" : "verification_requested";
+      reviewFraud(alert.sourceId, mapped);
+      if (action === "verify" && alert.member) {
+        pushNotification(alert.member.id, "Verification requested", "Please confirm this transaction with the cooperative office.");
+      }
+    } else if (alert.kind === "loan" || alert.kind === "verification") {
+      if (action === "approve") decideLoan(alert.sourceId, "approved");
+      else if (action === "reject") decideLoan(alert.sourceId, "rejected");
+      else {
+        pushAudit("VERIFICATION_REQUESTED", currentUser.name, { loanId: alert.sourceId, member: alert.member?.name });
+        if (alert.member) pushNotification(alert.member.id, "Verification requested", "Please complete additional identity verification for your loan application.");
+      }
+    }
+  };
+
   const runAiScan = (transaction, flags) => {
     const verdict = flags.length === 0 ? "clear" : flags.length === 1 ? "watch" : "high_risk";
     const entry = { id: nextId(), tx: transaction, flags, verdict, ts: Date.now(), userId: transaction.userId };
@@ -608,45 +656,53 @@ export default function CoopGuardSim() {
     return { totalSavings, pendingLoans, activeLoans, totalDisbursed, openFlags, memberCount: members.length };
   }, [members, loans, fraudFlags]);
 
-  // The Super Admin is a distinct platform-level role — separate from
-  // cooperative staff — so it gets its own, much shorter nav rather than
-  // being folded into the existing member/staff nav below.
+  // Three separate, role-appropriate navigations rather than one crowded
+  // generic menu. Cooperative Administration is further filtered by the
+  // signed-in officer's permissions (see src/superadmin/roles.js), so a
+  // Secretary never even sees a "Finance" tab, for example.
+  const COOP_SECTIONS = [
+    { id: "overview", label: "Overview", icon: LayoutGrid },
+    { id: "members", label: "Members", icon: Users, permission: "coop.manage_members" },
+    { id: "finance", label: "Finance", icon: Wallet, permission: "coop.manage_finance" },
+    { id: "loans", label: "Loans & Credit", icon: FileText, permission: "coop.manage_loans" },
+    { id: "operations", label: "Operations", icon: Brain, permission: "coop.manage_loans" },
+    { id: "risk", label: "Risk & Security", icon: ShieldAlert, permission: "coop.audit_oversight" },
+    { id: "governance", label: "Governance", icon: Vote, permission: "coop.manage_governance" },
+    { id: "reports", label: "Reports & Audit", icon: Hash, permission: "coop.audit_oversight" },
+    { id: "settings", label: "Settings", icon: Settings },
+  ].filter((s) => !s.permission || myPermissions.includes(s.permission));
+
+  const MEMBER_SECTIONS = [
+    { id: "home", label: "Home", icon: BarChart3 },
+    { id: "wallet", label: "Savings & Contributions", icon: Wallet },
+    { id: "loans", label: "Loans & Repayments", icon: FileText },
+    { id: "activities", label: "Cooperative Activities", icon: Video },
+    { id: "voting", label: "Voting", icon: Vote },
+    { id: "ask", label: "Ask Coop Guard", icon: MessageSquare },
+    { id: "profile", label: "Profile", icon: UserCircle2 },
+  ];
+
   const NAV = isSuperAdmin
     ? [
         { id: "superadmin", label: "Super Admin Workspace", icon: LayoutGrid },
         { id: "notifications", label: "Notifications", icon: Bell, badge: unreadCount },
         { id: "audit", label: "Audit Ledger", icon: Hash },
       ]
-    : [
-        { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-        { id: "wallet", label: "Virtual Wallet", icon: Wallet },
-        { id: "loans", label: "Loans", icon: FileText },
-        { id: "credit", label: "Credit & BVN", icon: CreditCard },
-        { id: "reputation", label: "Reputation Passport", icon: Award },
-        { id: "voting", label: "Decisions & Voting", icon: Vote },
-        { id: "meeting", label: "Live Meeting", icon: Video },
-        { id: "notifications", label: "Notifications", icon: Bell, badge: unreadCount },
-        { id: "audit", label: "Audit Ledger", icon: Hash },
-        ...(isStaff ? [{ id: "admin", label: "Cooperative Control", icon: ShieldCheck }] : []),
-        { id: "officer", label: "Loan Officer Desk", icon: Gauge, staffOnly: true },
-        { id: "fraud", label: "Fraud Watch", icon: ShieldAlert, staffOnly: true },
-        { id: "ai", label: "AI Operations Center", icon: Brain, staffOnly: true },
-      ].filter((item) => !item.staffOnly || isStaff);
+    : isCoopStaff ? COOP_SECTIONS : MEMBER_SECTIONS;
 
-  // Route the Super Admin straight into their workspace (and back out of it
-  // if the demo role switcher moves the session to a non-super-admin user).
+  // Route each session into the right home tab for its category (and back
+  // out again if the demo role switcher moves the session to a different
+  // category mid-session). "notifications" is reachable everywhere via the
+  // bell icon even though it isn't listed in any of the navs above.
   useEffect(() => {
     if (!authedUserId) return;
-    const validTabIds = NAV.map((item) => item.id);
-    if (isSuperAdmin && tab !== "superadmin" && !validTabIds.includes(tab)) {
-      setTab("superadmin");
-    } else if (isSuperAdmin && tab === "dashboard") {
-      setTab("superadmin");
-    } else if (!isSuperAdmin && tab === "superadmin") {
-      setTab("dashboard");
-    }
+    const validTabIds = [...NAV.map((item) => item.id), "notifications"];
+    if (validTabIds.includes(tab)) return;
+    if (isSuperAdmin) setTab("superadmin");
+    else if (isCoopStaff) setTab("overview");
+    else setTab("home");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuperAdmin, authedUserId, currentUserId]);
+  }, [isSuperAdmin, isCoopStaff, authedUserId, currentUserId]);
 
   if (!authedUserId) {
     return (
@@ -670,7 +726,7 @@ export default function CoopGuardSim() {
         />
         {navOpen && <div className="cg-nav-overlay" onClick={() => setNavOpen(false)} />}
         <main className="cg-main">
-          <TopBar currentUser={currentUser} stats={stats} onMenuClick={() => setNavOpen(true)} isSuperAdmin={isSuperAdmin} />
+          <TopBar currentUser={currentUser} stats={stats} onMenuClick={() => setNavOpen(true)} isSuperAdmin={isSuperAdmin} isCoopStaff={isCoopStaff} unreadCount={unreadCount} setTab={setTab} />
           <div className="cg-content">
             {tab === "superadmin" && isSuperAdmin && (
               <SuperAdminWorkspace
@@ -679,19 +735,78 @@ export default function CoopGuardSim() {
                 currentUser={currentUser} audit={audit} showToast={showToast}
               />
             )}
-            {tab === "dashboard" && !isSuperAdmin && <Dashboard stats={stats} members={members} loans={loans} tx={tx} currentUser={currentUser} myTx={myTx} myLoans={myLoans} fraudFlags={fraudFlags} isStaff={isStaff} setTab={setTab} />}
-            {tab === "wallet" && <WalletPanel currentUser={currentUser} myTx={myTx} onDeposit={doDeposit} onWithdraw={doWithdraw} />}
-            {tab === "loans" && <LoansPanel currentUser={currentUser} myLoans={myLoans} loans={loans} members={members} isStaff={isStaff} onApply={applyForLoan} onDecide={decideLoan} onRepay={repayLoan} onGuarantorRespond={respondGuarantor} currentUserId={currentUserId} onEnrollBiometric={enrollBiometric} />}
-            {tab === "credit" && <CreditPanel currentUser={currentUser} members={members} isStaff={isStaff} />}
-            {tab === "reputation" && <ReputationPanel currentUser={currentUser} members={members} repEvents={repEvents} disputes={disputes} isStaff={isStaff} onFileComplaint={fileComplaint} onResolveDispute={resolveDispute} />}
-            {tab === "voting" && <VotingPanel proposals={proposals} members={members} currentUserId={currentUserId} isStaff={isStaff} onVote={castVote} onCreate={createProposal} />}
-            {tab === "meeting" && <MeetingPanel currentUser={currentUser} members={members} chat={chat} onSend={sendChat} onJoin={() => bumpReputation(currentUserId, "participation", 1, "Attended live cooperative meeting")} />}
+            {/* Universal — reachable from any category via the bell icon */}
             {tab === "notifications" && <NotificationsPanel notifs={myNotifs} onMarkAll={markAllRead} />}
-            {tab === "audit" && <AuditPanel audit={audit} />}
-            {tab === "admin" && isStaff && <AdminPanel members={members} loans={loans} tx={tx} setMembers={setMembers} pushAudit={pushAudit} pushNotification={pushNotification} currentUser={currentUser} isAdmin={isAdmin} />}
-            {tab === "officer" && isStaff && <LoanOfficerPanel loans={loans} members={members} onDecide={decideLoan} />}
-            {tab === "fraud" && isStaff && <FraudPanel flags={fraudFlags} members={members} onReview={reviewFraud} />}
-            {tab === "ai" && isStaff && <AiOperationsCenter scans={aiScans} members={members} fraudFlags={fraudFlags} loans={loans} audit={audit} currentUser={currentUser} setTab={setTab} />}
+            {tab === "audit" && isSuperAdmin && <AuditPanel audit={audit} />}
+
+            {/* ---------- Cooperative Administration ---------- */}
+            {isCoopStaff && tab === "overview" && (
+              <CooperativeOverview
+                members={members} tx={tx} loans={loans} fraudFlags={fraudFlags} aiScans={aiScans}
+                onApproveAlert={(a) => handleAlertAction(a, "approve")}
+                onRejectAlert={(a) => handleAlertAction(a, "reject")}
+                onRequestVerification={(a) => handleAlertAction(a, "verify")}
+                setSection={setTab}
+              />
+            )}
+            {isCoopStaff && tab === "members" && <MembersSection members={members} onUpdateMember={updateMemberProfile} />}
+            {isCoopStaff && tab === "finance" && <FinanceSection members={members} tx={tx} fraudFlags={fraudFlags} onReviewFraud={reviewFraud} />}
+            {isCoopStaff && tab === "loans" && (
+              <div className="cg-page">
+                <div className="cg-page-head"><div className="cg-eyebrow">Cooperative Administration</div><h2>Loans & Credit</h2><p className="cg-page-desc">Review applications, then check each member's Credit Intelligence before deciding.</p></div>
+                <LoanOfficerPanel loans={loans} members={members} onDecide={decideLoan} />
+                <CreditIntelligenceOverview members={members} tx={tx} loans={loans} />
+              </div>
+            )}
+            {isCoopStaff && tab === "operations" && (
+              <OperationsCenter
+                members={members} loans={loans} fraudFlags={fraudFlags} aiScans={aiScans}
+                onApproveAlert={(a) => handleAlertAction(a, "approve")}
+                onRejectAlert={(a) => handleAlertAction(a, "reject")}
+                onRequestVerification={(a) => handleAlertAction(a, "verify")}
+              />
+            )}
+            {isCoopStaff && tab === "risk" && (
+              <div className="cg-page">
+                <div className="cg-page-head"><div className="cg-eyebrow">Cooperative Administration</div><h2>Risk & Security</h2><p className="cg-page-desc">Independent oversight of flagged activity and the tamper-evident audit trail.</p></div>
+                <FraudPanel flags={fraudFlags} members={members} onReview={reviewFraud} />
+                <AuditPanel audit={audit} />
+              </div>
+            )}
+            {isCoopStaff && tab === "governance" && (
+              <div className="cg-page">
+                <div className="cg-page-head"><div className="cg-eyebrow">Cooperative Administration</div><h2>Governance</h2></div>
+                <VotingPanel proposals={proposals} members={members} currentUserId={currentUserId} isStaff onVote={castVote} onCreate={createProposal} />
+                <MeetingPanel currentUser={currentUser} members={members} chat={chat} onSend={sendChat} onJoin={() => bumpReputation(currentUserId, "participation", 1, "Attended live cooperative meeting")} />
+              </div>
+            )}
+            {isCoopStaff && tab === "reports" && (
+              <div className="cg-page">
+                <div className="cg-page-head"><div className="cg-eyebrow">Cooperative Administration</div><h2>Reports & Audit</h2></div>
+                <AuditPanel audit={audit} />
+              </div>
+            )}
+            {isCoopStaff && tab === "settings" && (
+              <div className="cg-page">
+                <div className="cg-page-head"><div className="cg-eyebrow">Cooperative Administration</div><h2>Settings</h2><p className="cg-page-desc">Signed in as {currentUser.name} — {getRoleMeta(currentUser.role).label}.</p></div>
+                <div className="cg-card">
+                  <div className="cg-card-head"><h3>Your permissions</h3></div>
+                  <div className="cg-intel-split" style={{ padding: "0 18px 18px" }}>
+                    {myPermissions.length === 0 && <span className="cg-muted">No special permissions assigned.</span>}
+                    {myPermissions.map((p) => <span key={p} className="cg-intel-chip cg-intel-ok">{p}</span>)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------- Member Experience ---------- */}
+            {isMemberCat && tab === "home" && <MemberHome currentUser={currentUser} myTx={myTx} myLoans={myLoans} myNotifs={myNotifs} setTab={setTab} />}
+            {isMemberCat && tab === "wallet" && <WalletPanel currentUser={currentUser} myTx={myTx} onDeposit={doDeposit} onWithdraw={doWithdraw} />}
+            {isMemberCat && tab === "loans" && <LoansPanel currentUser={currentUser} myLoans={myLoans} loans={loans} members={members} isStaff={false} onApply={applyForLoan} onDecide={decideLoan} onRepay={repayLoan} onGuarantorRespond={respondGuarantor} currentUserId={currentUserId} onEnrollBiometric={enrollBiometric} />}
+            {isMemberCat && tab === "activities" && <MeetingPanel currentUser={currentUser} members={members} chat={chat} onSend={sendChat} onJoin={() => bumpReputation(currentUserId, "participation", 1, "Attended live cooperative meeting")} />}
+            {isMemberCat && tab === "voting" && <VotingPanel proposals={proposals} members={members} currentUserId={currentUserId} isStaff={false} onVote={castVote} onCreate={createProposal} />}
+            {isMemberCat && tab === "ask" && <AskCoopGuard currentUser={currentUser} myTx={myTx} myLoans={myLoans} />}
+            {isMemberCat && tab === "profile" && <MemberProfile currentUser={currentUser} myTx={myTx} myLoans={myLoans} onEnrollBiometric={enrollBiometric} />}
           </div>
         </main>
       </div>
@@ -1363,22 +1478,33 @@ function Sidebar({ nav, tab, setTab, currentUser, members, currentUserId, setCur
 // ============================================================
 // TOP BAR
 // ============================================================
-function TopBar({ currentUser, stats, onMenuClick, isSuperAdmin }) {
+function TopBar({ currentUser, stats, onMenuClick, isSuperAdmin, isCoopStaff, unreadCount, setTab }) {
   return (
     <header className="cg-topbar">
       <div className="cg-topbar-left">
         <button className="cg-menu-btn" onClick={onMenuClick} aria-label="Open menu"><Menu size={20} /></button>
         <img src="/brand/coopguard-mark.png" alt="CoopGuard" className="cg-topbar-logo" />
         <div>
-          <div className="cg-eyebrow">{isSuperAdmin ? "Platform" : "Member"}</div>
+          <div className="cg-eyebrow">{isSuperAdmin ? "Platform" : isCoopStaff ? "Cooperative Administration" : "Member"}</div>
           <div className="cg-topbar-name">{currentUser.name} <span className="cg-pill">{currentUser.role.replace("_", " ")}</span></div>
         </div>
       </div>
       <div className="cg-topbar-right">
+        {!isSuperAdmin && setTab && (
+          <button className="cg-icon-btn" style={{ position: "relative" }} title="Notifications" onClick={() => setTab("notifications")}>
+            <Bell size={17} />
+            {unreadCount > 0 && <span className="cg-badge" style={{ position: "absolute", top: -4, right: -4 }}>{unreadCount}</span>}
+          </button>
+        )}
         {isSuperAdmin ? (
           <div className="cg-mini-stat">
             <span className="cg-mini-label">Platform users</span>
             <span className="cg-mini-value">{stats.memberCount}</span>
+          </div>
+        ) : isCoopStaff ? (
+          <div className="cg-mini-stat">
+            <span className="cg-mini-label">Pending approvals</span>
+            <span className="cg-mini-value">{stats.pendingLoans + stats.openFlags}</span>
           </div>
         ) : (
           <div className="cg-mini-stat">
@@ -3508,6 +3634,125 @@ function Style() {
         .cg-topbar-name span.cg-pill { display: none; }
         .cg-signin-card { padding: 24px 18px; }
       }
+
+      /* ============================================================
+         Stage 2 — Cooperative Administration & Member Experience
+         ============================================================ */
+      .cg-page-head { margin-bottom: 2px; }
+      .cg-page-head h2 { margin: 4px 0 4px; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+      .cg-page-desc { margin: 0; color: #5B6B7A; font-size: 13px; max-width: 620px; }
+      .cg-muted { color: #8A97A3; font-size: 11.5px; }
+      .cg-cap { text-transform: capitalize; }
+      .cg-link { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--cg-blue); font-size: 12.5px; cursor: pointer; padding: 0; }
+
+      .cg-btn-sm { padding: 6px 10px; font-size: 12px; }
+      .cg-btn-danger { background: var(--cg-red); border-color: var(--cg-red); color: #fff; }
+      .cg-btn-ghost { background: none; }
+
+      .cg-overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+      .cg-overview-grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+      .cg-ov-stat { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; background: #fff; border: 1px solid var(--cg-line); border-radius: 12px; padding: 14px; }
+      .cg-ov-stat-value { font-size: 20px; font-weight: 700; }
+      .cg-ov-stat-label { font-size: 12px; color: #5B6B7A; }
+      .cg-ov-stat-warn svg { color: #C08A1E; }
+      .cg-ov-stat-ok svg { color: #2F9E63; }
+
+      .cg-intel-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px 18px 4px; }
+      .cg-intel-total { display: flex; flex-direction: column; align-items: flex-start; }
+      .cg-intel-total strong { font-size: 24px; }
+      .cg-intel-total span { font-size: 11.5px; color: #8A97A3; }
+      .cg-intel-split { display: flex; gap: 6px; flex-wrap: wrap; }
+      .cg-intel-chip { border-radius: 999px; padding: 4px 10px; font-size: 11.5px; font-weight: 600; }
+      .cg-intel-ok { background: #E4F5EB; color: #1C7A46; }
+      .cg-intel-warn { background: #FBF0DA; color: #92650F; }
+      .cg-intel-bad { background: #FBE4E1; color: #A32E20; }
+      .cg-intel-note { padding: 8px 18px 16px; margin: 0; }
+
+      .cg-alert-list { display: flex; flex-direction: column; gap: 8px; padding: 10px 18px 18px; }
+      .cg-alert { border: 1px solid var(--cg-line); border-radius: 10px; overflow: hidden; }
+      .cg-alert-decided { opacity: 0.7; }
+      .cg-alert-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 13px; background: #fff; border: none; cursor: pointer; text-align: left; font-family: inherit; }
+      .cg-alert-icon-bad { color: var(--cg-red); } .cg-alert-icon-warn { color: #C08A1E; } .cg-alert-icon-ok { color: #2F9E63; }
+      .cg-alert-head-text { flex: 1; min-width: 0; }
+      .cg-alert-title { font-size: 13.5px; font-weight: 600; }
+      .cg-alert-meta { font-size: 11.5px; color: #8A97A3; margin-top: 2px; }
+      .cg-alert-decided-tag { color: #2F9E63; }
+      .cg-alert-body { padding: 4px 13px 13px; background: var(--cg-paper-2); }
+      .cg-alert-workflow { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+      .cg-workflow-step { font-size: 10px; padding: 3px 7px; border-radius: 999px; background: #fff; border: 1px solid var(--cg-line); color: #8A97A3; }
+      .cg-workflow-step.done { background: var(--cg-navy); color: #fff; border-color: var(--cg-navy); }
+      .cg-alert-row { margin-bottom: 8px; }
+      .cg-alert-row span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #8A97A3; margin-bottom: 2px; }
+      .cg-alert-row p { margin: 0; font-size: 13px; }
+      .cg-alert-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+      .cg-alert-ts { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: #8A97A3; margin-top: 8px; }
+
+      .cg-workflow-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--cg-line); border-radius: 12px; padding: 12px 16px; }
+      .cg-workflow-banner-step { font-size: 11.5px; font-weight: 600; color: var(--cg-navy-2); background: var(--cg-paper-2); border-radius: 999px; padding: 5px 10px; }
+      .cg-workflow-arrow { color: #8A97A3; font-size: 12px; }
+
+      .cg-scan-feed { list-style: none; margin: 0; padding: 6px 18px 16px; display: flex; flex-direction: column; gap: 8px; }
+      .cg-scan-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+      .cg-scan-row span:first-of-type { flex: 1; }
+      .cg-scan-clear svg { color: #2F9E63; } .cg-scan-watch svg { color: #C08A1E; } .cg-scan-high_risk svg { color: var(--cg-red); }
+      .cg-scan-verdict { font-size: 11px; font-weight: 600; color: #8A97A3; }
+
+      .cg-search-bar { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--cg-line); border-radius: 8px; padding: 9px 11px; }
+      .cg-search-bar input { border: none; outline: none; font-size: 13px; flex: 1; }
+
+      .cg-modal-overlay { position: fixed; inset: 0; background: rgba(14,26,48,0.45); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
+      .cg-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+      .cg-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--cg-line); }
+      .cg-modal-head h3 { margin: 0; font-size: 15px; }
+      .cg-modal-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+      .cg-modal-body label { font-size: 11.5px; font-weight: 600; color: #5B6B7A; margin-top: 8px; }
+      .cg-modal-body input { border: 1px solid var(--cg-line); border-radius: 8px; padding: 9px 11px; font-size: 13.5px; }
+      .cg-modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 18px 18px; }
+
+      .cg-approval-list { list-style: none; margin: 0; padding: 4px 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+      .cg-approval-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--cg-line); border-radius: 10px; padding: 10px 12px; }
+      .cg-approval-actions { display: flex; gap: 6px; }
+
+      .cg-credit-overview { padding-bottom: 6px; }
+      .cg-credit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; padding: 12px 18px 18px; }
+      .cg-credit-card { border: 1px solid var(--cg-line); border-radius: 12px; padding: 14px; background: #fff; }
+      .cg-credit-card-compact { padding: 12px; }
+      .cg-credit-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+      .cg-credit-card-name { font-weight: 700; font-size: 13.5px; }
+      .cg-credit-score { display: flex; align-items: center; gap: 4px; font-size: 17px; font-weight: 700; }
+      .cg-credit-score span { font-size: 11px; font-weight: 500; color: #8A97A3; }
+      .cg-credit-score-ok { color: #1C7A46; } .cg-credit-score-warn { color: #92650F; } .cg-credit-score-bad { color: #A32E20; }
+      .cg-credit-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+      .cg-credit-rows div { display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px dashed var(--cg-line); padding-bottom: 5px; }
+      .cg-credit-rows span { color: #8A97A3; }
+      .cg-risk-ok { color: #1C7A46; } .cg-risk-warn { color: #92650F; } .cg-risk-bad { color: #A32E20; }
+      .cg-credit-recommendation { display: flex; gap: 8px; align-items: flex-start; background: var(--cg-paper-2); border-radius: 8px; padding: 9px 10px; font-size: 12px; }
+
+      .cg-loan-summary { display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 18px; }
+      .cg-loan-summary div { display: flex; flex-direction: column; gap: 2px; }
+      .cg-loan-summary span { font-size: 11px; color: #8A97A3; }
+
+      .cg-quicklinks { display: flex; gap: 10px; flex-wrap: wrap; }
+      .cg-quicklink { display: flex; align-items: center; gap: 7px; background: #fff; border: 1px solid var(--cg-line); border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 600; cursor: pointer; flex: 1; min-width: 160px; justify-content: center; }
+      .cg-badge { background: var(--cg-red); color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 6px; margin-left: 2px; }
+
+      .cg-ask-wrap { background: #fff; border: 1px solid var(--cg-line); border-radius: 14px; display: flex; flex-direction: column; height: 60vh; max-height: 520px; overflow: hidden; }
+      .cg-ask-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      .cg-ask-bubble { display: flex; gap: 6px; align-items: flex-start; max-width: 82%; padding: 9px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.45; }
+      .cg-ask-bot { background: var(--cg-paper-2); align-self: flex-start; }
+      .cg-ask-user { background: var(--cg-navy); color: #fff; align-self: flex-end; margin-left: auto; }
+      .cg-ask-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; }
+      .cg-ask-suggestions button { border: 1px solid var(--cg-line); background: #fff; border-radius: 999px; padding: 6px 11px; font-size: 12px; cursor: pointer; }
+      .cg-ask-input { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--cg-line); }
+      .cg-ask-input input { flex: 1; border: 1px solid var(--cg-line); border-radius: 999px; padding: 9px 14px; font-size: 13.5px; outline: none; }
+      .cg-ask-input button { background: var(--cg-navy); color: #fff; border: none; border-radius: 999px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+      .cg-activity-stats { display: flex; flex-direction: column; gap: 10px; padding: 10px 18px 6px; }
+      .cg-activity-stat { display: flex; align-items: center; gap: 10px; }
+      .cg-activity-bar { flex: 1; height: 6px; background: var(--cg-paper-2); border-radius: 999px; overflow: hidden; }
+      .cg-activity-bar-fill { height: 100%; background: var(--cg-teal); }
+      .cg-activity-stat-label { font-size: 12px; color: #5B6B7A; white-space: nowrap; }
+      .cg-activity-stat-label strong { color: var(--cg-ink); margin-left: 4px; }
     `}</style>
   );
 }
